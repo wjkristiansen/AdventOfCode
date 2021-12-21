@@ -61,6 +61,8 @@ uint32_t day3_reduce(bool most_common)
             }
         }
     }
+
+    return 0;
 }
 
 void day3()
