@@ -1,14 +1,20 @@
 #include <iostream>
 #include <unordered_set>
+#include <list>
 
 #include "input.h"
 
 class CDay4Card
 {
-    const int *m_numbers;
+    const int *m_numbers = nullptr;
     bool m_marked[5][5];
 
 public:
+    CDay4Card()
+    {
+        memset(m_marked, 0, sizeof(m_marked));
+    }
+
     CDay4Card(const int *numbers)
         : m_numbers(numbers)
     {
@@ -84,24 +90,40 @@ public:
 void day4_bingo()
 {
     // Initialze cards
-    std::vector<CDay4Card> cards;
+    std::list<CDay4Card> cards;
     for(int i = 0; i < _countof(g_day4_cards); i += 25)
     {
         cards.emplace_back(g_day4_cards + i);
     }
 
+    CDay4Card last_winner;
+    int last_winning_number = 0;
+
     for(int number : g_day4_numbers)
     {
-        for(auto &card : cards)
+        for(auto it = cards.begin(); it != cards.end();)
         {
+            auto &card = *it;
             if(card.Pick(number))
             {
-                int sum_unmarked = card.SumUnmarked();
-                int prod = sum_unmarked * number;
-                std::cout << "score=" << prod << std::endl;
-                return;
+                last_winner = card;
+                last_winning_number = number;
+
+                // remove the card from play
+                it = cards.erase(it);
+            }
+            else
+            {
+                ++it;
             }
         }
+    }
+
+    if (last_winning_number > 0)
+    {
+        int sum_unmarked = last_winner.SumUnmarked();
+        int prod = sum_unmarked * last_winning_number;
+        std::cout << "score=" << prod << std::endl;
     }
 }
 
