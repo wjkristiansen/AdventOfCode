@@ -4,6 +4,59 @@
 
 #include "input.h"
 
+void day5_lines()
+{
+    const int gridMax = 1000;
+    typedef int VentGrid[gridMax][gridMax];
+
+    static VentGrid grid;
+
+    memset(grid, 0, sizeof(grid));
+
+    struct Line
+    {
+        int begin[2];
+        int end[2];
+    };
+    const Line* pLines = reinterpret_cast<const Line*>(g_day5_vent_line_points);
+    const int numLines = sizeof(g_day5_vent_line_points) / sizeof(Line);
+
+    // Populate the grid with counts...
+    for (int lineIndex = 0; lineIndex < numLines; ++lineIndex)
+    {
+        const Line& line = pLines[lineIndex];
+
+        // Ignore lines that are not horizontal or vertical
+        if (line.begin[0] != line.end[0] && line.begin[1] != line.end[1])
+            continue;
+
+        int xmin = std::min(line.begin[0], line.end[0]);
+        int xmax = std::max(line.begin[0], line.end[0]);
+        int ymin = std::min(line.begin[1], line.end[1]);
+        int ymax = std::max(line.begin[1], line.end[1]);
+
+        for (int x = xmin; x <= xmax; ++x)
+        {
+            for (int y = ymin; y <= ymax; ++y)
+            {
+                grid[y][x]++;
+            }
+        }
+    }
+
+    // Count the number of grid values > 1
+    int total = 0;
+    for (int x = 0; x < gridMax; ++x)
+    {
+        for (int y = 0; y < gridMax; ++y)
+        {
+            if (grid[y][x] > 1) total++;
+        }
+    }
+
+    std::cout << "Total=" << total << std::endl;
+}
+
 class CDay4Card
 {
     const int *m_numbers = nullptr;
@@ -238,7 +291,7 @@ void day1()
 
 int main(int argc, char *argv[])
 {
-    day4_bingo();
+    day5_lines();
 
     return 0;
 }
