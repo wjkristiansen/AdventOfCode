@@ -4,6 +4,42 @@
 
 #include "input.h"
 
+void day6_lanternfish()
+{
+    const int breedCycle = 7;
+    const int firstBreed = breedCycle + 2;
+    const int simulationCycles = 80;
+
+    std::vector<char> fishAges(_countof(g_day6_lantern_fish_ages));
+    for (int i = 0; i < _countof(g_day6_lantern_fish_ages); ++i)
+    {
+        fishAges[i] = g_day6_lantern_fish_ages[i];
+    }
+
+    // Run simulation...
+    for (int cycle = 0; cycle < simulationCycles; ++cycle)
+    {
+        int existingFish = fishAges.size();
+        for (int i = 0; i < existingFish; ++i)
+        {
+            if (fishAges[i] == 0)
+            {
+                // Reset the breed cycle
+                fishAges[i] = breedCycle - 1;
+
+                // Spawn a new fish
+                fishAges.emplace_back(firstBreed - 1);
+            }
+            else
+            {
+                fishAges[i]--;
+            }
+        }
+    }
+
+    std::cout << "Num fish=" << fishAges.size() << std::endl;
+}
+
 void day5_lines()
 {
     const int gridMax = 1000;
@@ -323,7 +359,7 @@ void day1()
 
 int main(int argc, char *argv[])
 {
-    day5_lines();
+    day6_lanternfish();
 
     return 0;
 }
