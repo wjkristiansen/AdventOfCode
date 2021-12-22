@@ -4,40 +4,42 @@
 
 #include "input.h"
 
+uint64_t day6_decendent_cache[256] = { 0 };
+
+uint64_t day6_NumDecendants(int cycles)
+{
+    int cacheIndex = cycles - 1;
+    if (day6_decendent_cache[cacheIndex] > 0)
+        return day6_decendent_cache[cacheIndex];
+
+    // Immediate children
+    uint64_t decendants = 0;
+
+    // Calculate decendants per child
+    for (; cycles > 0; cycles -= g_day6_breedCycle)
+    {
+        // Add a child plus child decendants
+        decendants += 1 + day6_NumDecendants(cycles - g_day6_firstBreed);
+    }
+
+    day6_decendent_cache[cacheIndex] = decendants;
+
+    return decendants;
+}
+
 void day6_lanternfish()
 {
-    const int breedCycle = 7;
-    const int firstBreed = breedCycle + 2;
-    const int simulationCycles = 80;
+    memset(day6_decendent_cache, 0, sizeof(day6_decendent_cache));
 
-    std::vector<char> fishAges(_countof(g_day6_lantern_fish_ages));
+    uint64_t numFish = _countof(g_day6_lantern_fish_ages);
+
+    // For each original fish
     for (int i = 0; i < _countof(g_day6_lantern_fish_ages); ++i)
     {
-        fishAges[i] = g_day6_lantern_fish_ages[i];
+        numFish += day6_NumDecendants(g_day6_simulationCycles - g_day6_lantern_fish_ages[i]);
     }
 
-    // Run simulation...
-    for (int cycle = 0; cycle < simulationCycles; ++cycle)
-    {
-        int existingFish = fishAges.size();
-        for (int i = 0; i < existingFish; ++i)
-        {
-            if (fishAges[i] == 0)
-            {
-                // Reset the breed cycle
-                fishAges[i] = breedCycle - 1;
-
-                // Spawn a new fish
-                fishAges.emplace_back(firstBreed - 1);
-            }
-            else
-            {
-                fishAges[i]--;
-            }
-        }
-    }
-
-    std::cout << "Num fish=" << fishAges.size() << std::endl;
+    std::cout << "Num fish=" << numFish << std::endl;
 }
 
 void day5_lines()

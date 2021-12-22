@@ -14,6 +14,11 @@ const char g_day6_lantern_fish_ages[] =
     1,1,1,4,3,1,1,1,1,1,1,1,1,1,2,1,1,2,5,3
 };
 
+const int g_day6_breedCycle = 7;
+const int g_day6_maturePeriod = 2;
+const int g_day6_firstBreed = g_day6_breedCycle + g_day6_maturePeriod;
+const int g_day6_simulationCycles = 256;
+
 const int g_day5_vent_line_points[] =
 {
     561,579, 965,175,
