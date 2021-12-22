@@ -3,6 +3,108 @@
 
 #include "input.h"
 
+class CDay4Card
+{
+    const int *m_numbers;
+    bool m_marked[5][5];
+
+public:
+    CDay4Card(const int *numbers)
+        : m_numbers(numbers)
+    {
+        memset(m_marked, 0, sizeof(m_marked));
+    }
+
+    int NumberAt(int row, int col) const { return m_numbers[col + row * 5]; }
+
+    bool CheckRow(int row) const
+    {
+        for(int i = 0; i < 5; ++i)
+        {
+            if(!m_marked[row][i])
+                return false;
+        }
+        return true;
+    }
+
+    bool CheckCol(int col) const
+    {
+        for(int i = 0; i < 5; ++i)
+        {
+            if(!m_marked[i][col])
+                return false;
+        }
+        return true;
+    }
+
+    bool Pick(int number)
+    {
+        for(int row = 0; row < 5; ++row)
+        {
+            for(int col = 0; col < 5; ++col)
+            {
+                if(NumberAt(row, col) == number)
+                {
+                    // mark the number
+                    m_marked[row][col] = true;
+
+                    // is full row marked?
+                    if(CheckRow(row))
+                        return true;
+
+                    // is full column marked 
+                    if(CheckCol(col))
+                        return true;
+
+                    return false;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    int SumUnmarked() const
+    {
+        int sum = 0;
+        for(int row = 0; row < 5; ++row)
+        {
+            for(int col = 0; col < 5; ++col)
+            {
+                if(!m_marked[row][col])
+                {
+                    sum += NumberAt(row, col);
+                }
+            }
+        }
+        return sum;
+    }
+};
+
+void day4_bingo()
+{
+    // Initialze cards
+    std::vector<CDay4Card> cards;
+    for(int i = 0; i < _countof(g_day4_cards); i += 25)
+    {
+        cards.emplace_back(g_day4_cards + i);
+    }
+
+    for(int number : g_day4_numbers)
+    {
+        for(auto &card : cards)
+        {
+            if(card.Pick(number))
+            {
+                int sum_unmarked = card.SumUnmarked();
+                int prod = sum_unmarked * number;
+                std::cout << "score=" << prod << std::endl;
+                return;
+            }
+        }
+    }
+}
+
 uint32_t day3_reduce(bool most_common)
 {
     std::unordered_set<uint32_t> data;
@@ -114,7 +216,7 @@ void day1()
 
 int main(int argc, char *argv[])
 {
-    day3();
+    day4_bingo();
 
     return 0;
 }
