@@ -4,6 +4,32 @@
 
 #include "input.h"
 
+void day7_whales_and_crabs()
+{
+    int minCost = INT_MAX;;
+    int minLevel = 0;
+
+    for (int level = 1; level < 2048; ++level)
+    {
+        int cost = 0;
+
+        // Compute cost of moving crabs to level i
+        for (int i = 0; i < _countof(g_day7_crab_levels); ++i)
+        {
+            cost += std::abs(level - g_day7_crab_levels[i]);
+        }
+
+        if (cost < minCost)
+        {
+            minCost = cost;
+            minLevel = level;
+        }
+    }
+
+    std::cout << "Level=" << minLevel << std::endl;
+    std::cout << "Cost=" << minCost << std::endl;
+}
+
 uint64_t day6_decendent_cache[256] = { 0 };
 
 uint64_t day6_NumDecendants(int cycles)
@@ -361,7 +387,7 @@ void day1()
 
 int main(int argc, char *argv[])
 {
-    day6_lanternfish();
+    day7_whales_and_crabs();
 
     return 0;
 }
