@@ -26,20 +26,52 @@ void day5_lines()
     {
         const Line& line = pLines[lineIndex];
 
-        // Ignore lines that are not horizontal or vertical
-        if (line.begin[0] != line.end[0] && line.begin[1] != line.end[1])
-            continue;
-
-        int xmin = std::min(line.begin[0], line.end[0]);
-        int xmax = std::max(line.begin[0], line.end[0]);
-        int ymin = std::min(line.begin[1], line.end[1]);
-        int ymax = std::max(line.begin[1], line.end[1]);
-
-        for (int x = xmin; x <= xmax; ++x)
+        if (line.begin[0] == line.end[0])
         {
-            for (int y = ymin; y <= ymax; ++y)
+            // Line is vertical
+            int x = line.begin[0];
+            int y0 = line.begin[1];
+            int y1 = line.end[1];
+            if (y0 > y1)
+                std::swap(y0, y1);
+            for (int y = y0; y <= y1; ++y)
             {
                 grid[y][x]++;
+            }
+        }
+        else if (line.begin[1] == line.end[1])
+        {
+            // Line is horizontal
+            int y = line.begin[1];
+            int x0 = line.begin[0];
+            int x1 = line.end[0];
+            if (x0 > x1)
+                std::swap(x0, x1);
+            for (int x = x0; x <= x1; ++x)
+            {
+                grid[y][x]++;
+            }
+        }
+        else if (std::abs(line.end[0] - line.begin[0]) == std::abs(line.end[1] - line.begin[1]))
+        {
+            // Line is diagonal
+            int x0 = line.begin[0];
+            int x1 = line.end[0];
+            int y0 = line.begin[1];
+            int y1 = line.end[1];
+            if (x0 > x1)
+            {
+                std::swap(x0, x1);
+                std::swap(y0, y1);
+            }
+
+            int y = y0;
+            int ydelta = y0 < y1 ? 1 : -1;
+
+            for (int x = x0; x <= x1; ++x)
+            {
+                grid[y][x]++;
+                y += ydelta;
             }
         }
     }
