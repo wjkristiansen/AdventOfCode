@@ -9,6 +9,22 @@ void day7_whales_and_crabs()
     int minCost = INT_MAX;;
     int minLevel = 0;
 
+    std::vector<int> moveCosts(2048);
+    int cost = 1;
+    for (int i = 0; i < 2048; ++i)
+    {
+        moveCosts[i] = cost;
+        cost += (i + 2);
+    }
+
+    auto MoveCost = [&moveCosts](int delta) -> int
+    {
+        if (delta == 0)
+            return 0;
+
+        return moveCosts[delta - 1];
+    };
+
     for (int level = 1; level < 2048; ++level)
     {
         int cost = 0;
@@ -16,7 +32,8 @@ void day7_whales_and_crabs()
         // Compute cost of moving crabs to level i
         for (int i = 0; i < _countof(g_day7_crab_levels); ++i)
         {
-            cost += std::abs(level - g_day7_crab_levels[i]);
+            int delta = std::abs(level - g_day7_crab_levels[i]);
+            cost += MoveCost(delta);
         }
 
         if (cost < minCost)
