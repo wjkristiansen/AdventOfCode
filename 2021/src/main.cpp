@@ -1,8 +1,170 @@
 #include <iostream>
 #include <unordered_set>
 #include <list>
+#include <unordered_map>
+#include <algorithm>
+#include <assert.h>
 
 #include "input.h"
+
+void day8_7_seg_display()
+{
+    struct Patterns
+    {
+        const char* Reference[10];
+        const char* Output[4];
+    };
+
+    const Patterns* pPatterns = reinterpret_cast<Patterns*>(g_day8_seg_codes);
+    const int numInputs = sizeof(g_day8_seg_codes) / sizeof(Patterns);
+
+    auto MissingSegments = [](const char* s1, const char* s2, char missing[8])
+    {
+        int missingCount = 0;
+        for (const char *pc = s1; pc[0] != '\0'; ++pc)
+        {
+            if (!std::strchr(s2, pc[0]))
+            {
+                missing[missingCount] = pc[0];
+                missingCount++;
+            }
+        }
+        missing[missingCount] = '\0';
+
+        return missingCount;
+    };
+
+    auto BuildPatternMap = [MissingSegments](const Patterns& patterns)
+    {
+        // 1 matches 7 with segment 'a' missing
+        // 0 matches 8 with segment 'd' missing
+        // 9 matches 8 with segment 'e' missing
+        // 6 matches 8 with segment 'c' missing
+        // 3 matches 8 with segment 'b' and 'e' missing (but 'e' is now known)
+        // 4 uses 'f' in addition to known segments 'b', 'c', and 'd'
+        // the last unknown segment must be 'g'
+
+        // Find 1 and 7
+        const char* pPatterns[10] = { 0 };
+        int knownCount = 0;
+        for (int i = 0; i < 10; ++i)
+        {
+            switch (std::strlen(patterns.Reference[i]))
+            {
+            case 2:
+                pPatterns[1] = patterns.Reference[i];
+                knownCount++;
+                break;
+            case 3:
+                pPatterns[7] = patterns.Reference[i];
+                knownCount++;
+                break;
+            case 4:
+                pPatterns[4] = patterns.Reference[i];
+                knownCount++;
+                break;
+            case 7:
+                pPatterns[8] = patterns.Reference[i];
+                knownCount++;
+                break;
+            }
+
+            if (knownCount == 4)
+            {
+                // All easy digits found
+                break;
+            }
+        }
+
+        char missing[8] = { 0 };
+
+        for (int i = 0; i < 10; ++i)
+        {
+            switch (std::strlen(patterns.Reference[i]))
+            {
+            default:
+                break;
+            case 5:
+                // Must be 2, 3 or 5...
+
+                if (0 == MissingSegments(pPatterns[7], patterns.Reference[i], missing))
+                {
+                    // Only 3 contains all segments used by 7
+                    assert(pPatterns[3] == nullptr);
+                    pPatterns[3] = patterns.Reference[i];
+                }
+                else if (1 == MissingSegments(pPatterns[4], patterns.Reference[i], missing))
+                {
+                    // 4 has only one missing segment from 5
+                    assert(pPatterns[5] == nullptr);
+                    pPatterns[5] = patterns.Reference[i];
+                }
+                else
+                {
+                    assert(pPatterns[2] == nullptr);
+                    pPatterns[2] = patterns.Reference[i];
+                }
+
+                break;
+
+            case 6:
+                // Must be 0, 6, or 9...
+
+                if (1 == MissingSegments(pPatterns[7], patterns.Reference[i], missing))
+                {
+                    // 6 is missing only one segment from 7, whereas 0 and 9 both share segments with 7
+                    assert(pPatterns[6] == nullptr);
+                    pPatterns[6] = patterns.Reference[i];
+                }
+                else if (1 == MissingSegments(pPatterns[4], patterns.Reference[i], missing))
+                {
+                    // All segments in 4 are used by 9, but 0 is missing segment 'd'
+                    assert(pPatterns[0] == nullptr);
+                    pPatterns[0] = patterns.Reference[i];
+                }
+                else
+                {
+                    assert(pPatterns[9] == nullptr);
+                    pPatterns[9] = patterns.Reference[i];
+                }
+                knownCount++;
+                break;
+            }
+        }
+
+        std::unordered_map<std::string, int> patternMap;
+
+        for (int i = 0; i < 10; ++i)
+        {
+            std::string patternString(pPatterns[i]);
+            std::sort(patternString.begin(), patternString.end());
+            patternMap.emplace(patternString, i);
+        }
+
+        return patternMap;
+    };
+
+    int sum = 0;
+    for (int i = 0; i < numInputs; ++i)
+    {
+        const Patterns& patterns = pPatterns[i];
+
+        std::unordered_map<std::string, int> patternMap = BuildPatternMap(patterns);
+
+        // Now use the patterns to decode the output
+        int factor = 1000;
+        for (int outputIndex = 0; outputIndex < 4; ++outputIndex)
+        {
+            std::string codeString(patterns.Output[outputIndex]);
+            std::sort(codeString.begin(), codeString.end());
+            int value = patternMap[codeString];
+            sum += value * factor;
+            factor = factor / 10;
+        }
+    }
+
+    std::cout << "Sum=" << sum << std::endl;
+}
 
 void day7_whales_and_crabs()
 {
@@ -404,7 +566,7 @@ void day1()
 
 int main(int argc, char *argv[])
 {
-    day7_whales_and_crabs();
+    day8_7_seg_display();
 
     return 0;
 }
