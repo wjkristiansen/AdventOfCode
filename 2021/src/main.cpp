@@ -7,6 +7,33 @@
 
 #include "input.h"
 
+void day9_smoke_basin()
+{
+    int sum = 0;
+
+    for(int row = 0; row < g_day9_map_height; ++row)
+    {
+        for(int col = 0; col < g_day9_map_width; ++col)
+        {
+            int height = g_day9_height_map[row][col];
+            if(row > 0 && height >= g_day9_height_map[row - 1][col])
+                continue; // Not a low point
+            if(row < g_day9_map_height - 1 && height >= g_day9_height_map[row + 1][col])
+                continue; // Not a low point
+            if(col > 0 && height >= g_day9_height_map[row][col - 1])
+                continue;
+            if(col < g_day9_map_width - 1 && height >= g_day9_height_map[row][col + 1])
+                continue;
+
+            // low point
+            int riskLevel = height + 1;
+            sum += riskLevel;
+        }
+    }
+
+    std::cout << "Risk=" << sum << std::endl;
+}
+
 void day8_7_seg_display()
 {
     struct Patterns
@@ -566,7 +593,7 @@ void day1()
 
 int main(int argc, char *argv[])
 {
-    day8_7_seg_display();
+    day9_smoke_basin();
 
     return 0;
 }
