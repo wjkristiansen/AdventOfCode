@@ -1,11 +1,93 @@
 #include <iostream>
 #include <unordered_set>
 #include <list>
+#include <deque>
 #include <unordered_map>
 #include <algorithm>
 #include <assert.h>
 
 #include "input.h"
+
+void day10_syntax_scoring()
+{
+    int score = 0;
+    for (int i = 0; i < _countof(g_day10_lines); ++i)
+    {
+        std::deque<char> chunks;
+
+        for (const char* pToken = g_day10_lines[i]; pToken[0] != '\0'; pToken++)
+        {
+            bool error = false;
+
+            switch (pToken[0])
+            {
+                // Open chunk tokens
+            case '[':
+            case '(':
+            case '<':
+            case '{':
+                chunks.push_back(pToken[0]);
+                break;
+
+                // Close chunk tokens
+            case ']':
+                if (chunks.back() != '[')
+                {
+                    score += 57;
+                    error = true;
+                }
+                else
+                {
+                    chunks.pop_back();
+                }
+                break;
+            case ')':
+                if (chunks.back() != '(')
+                {
+                    score += 3;
+                    error = true;
+                }
+                else
+                {
+                    chunks.pop_back();
+                }
+                break;
+            case '>':
+                if (chunks.back() != '<')
+                {
+                    score += 25137;
+                    error = true;
+                }
+                else
+                {
+                    chunks.pop_back();
+                }
+                break;
+            case '}':
+                if (chunks.back() != '{')
+                {
+                    score += 1197;
+                    error = true;
+                }
+                else
+                {
+                    chunks.pop_back();
+                }
+                break;
+            default:
+                assert(!"unexpected character");
+                break;
+            }
+
+            if (error)
+            {
+                break;
+            }
+        }
+    }
+
+    std::cout << "Score=" << score << std::endl;
+}
 
 int FillBasin(std::vector<std::vector<int>>& map, int row, int col)
 {
@@ -649,7 +731,7 @@ void day1()
 
 int main(int argc, char *argv[])
 {
-    day9_smoke_basin_part2();
+    day10_syntax_scoring();
 
     return 0;
 }
