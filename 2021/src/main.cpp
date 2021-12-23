@@ -7,6 +7,62 @@
 
 #include "input.h"
 
+int FillBasin(std::vector<std::vector<int>>& map, int row, int col)
+{
+    int count = 0;
+    if (map[row][col] < 9)
+    {
+        map[row][col] = 9;
+        count++;
+        if(row > 0)
+            count += FillBasin(map, row - 1, col);
+
+        if(row < g_day9_map_height - 1)
+            count += FillBasin(map, row + 1, col);
+
+        if(col > 0)
+            count += FillBasin(map, row, col - 1);
+
+        if(col < g_day9_map_width - 1)
+            count += FillBasin(map, row, col + 1);
+    }
+
+    return count;
+}
+
+void day9_smoke_basin_part2()
+{
+    // Make a copy of the height map
+    std::vector<std::vector<int>> map(g_day9_map_height);
+    for(int row = 0; row < g_day9_map_height; ++row)
+    {
+        map[row].resize(g_day9_map_width);
+        std::memcpy(map[row].data(), g_day9_height_map[row], g_day9_map_width * sizeof(g_day9_height_map[row][0]));
+    }
+
+    int basinSizes[3] = { 0 };
+
+    for(int row = 0; row < g_day9_map_height; ++row)
+    {
+        for(int col = 0; col < g_day9_map_width; ++col)
+        {
+            int basinSize = FillBasin(map, row, col);
+            if (basinSize > 0)
+            {
+                // Get the index of the third-largest basin so far
+                int i = basinSizes[0] < basinSizes[1] ? 0 : 1;
+                i = basinSizes[i] < basinSizes[2] ? i : 2;
+
+                if (basinSize > basinSizes[i])
+                    basinSizes[i] = basinSize;
+            }
+        }
+    }
+
+    int product = basinSizes[0] * basinSizes[1] * basinSizes[2];
+    std::cout << "Product=" << product << std::endl;
+}
+
 void day9_smoke_basin()
 {
     int sum = 0;
@@ -593,7 +649,7 @@ void day1()
 
 int main(int argc, char *argv[])
 {
-    day9_smoke_basin();
+    day9_smoke_basin_part2();
 
     return 0;
 }
