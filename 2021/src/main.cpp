@@ -10,15 +10,17 @@
 
 void day10_syntax_scoring()
 {
+    std::vector<size_t> lineScores;
+
     int score = 0;
     for (int i = 0; i < _countof(g_day10_lines); ++i)
     {
+        bool error = false;
+
         std::deque<char> chunks;
 
         for (const char* pToken = g_day10_lines[i]; pToken[0] != '\0'; pToken++)
         {
-            bool error = false;
-
             switch (pToken[0])
             {
                 // Open chunk tokens
@@ -80,13 +82,43 @@ void day10_syntax_scoring()
             }
 
             if (error)
-            {
                 break;
+        }
+
+        if(!error)
+        {
+            size_t lineScore = 0;
+            while (chunks.size() > 0)
+            {
+                switch (chunks.back())
+                {
+                case '(':
+                    lineScore *= 5;
+                    lineScore += 1;
+                    break;
+                case '[':
+                    lineScore *= 5;
+                    lineScore += 2;
+                    break;
+                case '{':
+                    lineScore *= 5;
+                    lineScore += 3;
+                    break;
+                case '<':
+                    lineScore *= 5;
+                    lineScore += 4;
+                    break;
+                }
+                chunks.pop_back();
             }
+            lineScores.push_back(lineScore);
         }
     }
 
-    std::cout << "Score=" << score << std::endl;
+    std::sort(lineScores.begin(), lineScores.end());
+    int middleIndex = lineScores.size() / 2;
+
+    std::cout << "Middle Score=" << lineScores[middleIndex] << std::endl;
 }
 
 int FillBasin(std::vector<std::vector<int>>& map, int row, int col)
