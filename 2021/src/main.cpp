@@ -13,7 +13,7 @@ namespace Day12
 {
     struct CaveNode
     {
-        bool IsVisited = false;
+        int VisitCount = 0;
         bool IsLarge = false;
         std::string Name;
         std::vector<int> NeighborIndices;
@@ -34,6 +34,7 @@ namespace Day12
         int m_startIndex = 0;
         int m_endIndex = 0;
         int m_pathCount = 0;
+        int m_smallExtra = -1;
 
         int GetCaveNodeIndex(const std::string& name)
         {
@@ -79,29 +80,44 @@ namespace Day12
         {
             CaveNode& node = m_caveNodes[nodeIndex];
 
-            if (!node.IsVisited || node.IsLarge)
+            if (!node.IsLarge)
             {
-                pathQueue.push_back(nodeIndex);
-                node.IsVisited = true;
-                for (int neighborIndex : node.NeighborIndices)
+                if (node.VisitCount > 0)
                 {
-                    if (neighborIndex == m_endIndex)
-                    {
-                        for (auto segment : pathQueue)
-                        {
-                            std::cout << m_caveNodes[segment].Name << ",";
-                        }
-                        std::cout << "end" << std::endl;
-
-                        m_pathCount++;
-                        continue;
-                    }
-
-                    CalcPaths(neighborIndex, pathQueue);
+                    if (m_smallExtra < 0 && nodeIndex != m_startIndex && nodeIndex != m_endIndex)
+                        m_smallExtra = nodeIndex;
+                    else
+                        return;
                 }
-                node.IsVisited = false;
-                pathQueue.pop_back();
+
+                if (node.VisitCount > 1 && m_smallExtra != nodeIndex)
+                    return;
             }
+
+            pathQueue.push_back(nodeIndex);
+            node.VisitCount++;
+            for (int neighborIndex : node.NeighborIndices)
+            {
+                if (neighborIndex == m_endIndex)
+                {
+                    //for (auto segment : pathQueue)
+                    //{
+                    //    std::cout << m_caveNodes[segment].Name << ",";
+                    //}
+                    //std::cout << "end" << std::endl;
+
+                    m_pathCount++;
+                    continue;
+                }
+
+                CalcPaths(neighborIndex, pathQueue);
+            }
+            if (m_smallExtra == nodeIndex)
+            {
+                m_smallExtra = -1;
+            }
+            node.VisitCount--;
+            pathQueue.pop_back();
         }
 
         void Execute()
