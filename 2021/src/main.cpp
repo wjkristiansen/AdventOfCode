@@ -4,9 +4,71 @@
 #include <deque>
 #include <unordered_map>
 #include <algorithm>
+
 #include <assert.h>
 
 #include "input.h"
+
+class Day11
+{
+    uint64_t m_flashCount = 0;
+    int m_cycleFlashCount = 0;
+    int m_grid[10][10] = {0};
+    int m_flashReady[10][10] = { 0 };
+
+public:
+    void Tick(int step, int row, int col)
+    {
+        if (m_flashReady[row][col] > step)
+            return;
+
+        if (++m_grid[row][col] == 10)
+        {
+            m_flashCount++;
+            m_cycleFlashCount++;
+            m_flashReady[row][col] = step + 1;
+            m_grid[row][col] = 0;
+
+            // Tick neighbors
+            if (col > 0) Tick(step, row, col - 1);
+            if (col < g_day11_grid_width - 1) Tick(step, row, col + 1);
+            if (row > 0)
+            {
+                Tick(step, row - 1, col);
+                if (col > 0) Tick(step, row - 1, col - 1);
+                if (col < g_day11_grid_width - 1) Tick(step, row - 1, col + 1);
+            }
+            if (row < g_day11_grid_height - 1)
+            {
+                Tick(step, row + 1, col);
+                if (col > 0) Tick(step, row + 1, col - 1);
+                if (col < g_day11_grid_width - 1) Tick(step, row + 1, col + 1);
+            }
+        }
+    }
+
+    void Execute()
+    {
+        std::memcpy(m_grid, g_day11_energy_grid, 100 * sizeof(int));
+
+        int step = 0;
+        for (step = 0; m_cycleFlashCount != 100; ++step)
+        {
+            m_cycleFlashCount = 0;
+            for (int row = 0; row < g_day11_grid_height; ++row)
+            {
+                for (int col = 0; col < g_day11_grid_width; ++col)
+                {
+                    Tick(step, row, col);
+                }
+            }
+        }
+
+        std::cout << "FlashCount=" << m_flashCount << std::endl;
+        std::cout << "AllSyncStep=" << step << std::endl;
+    }
+
+};
 
 void day10_syntax_scoring()
 {
@@ -763,7 +825,8 @@ void day1()
 
 int main(int argc, char *argv[])
 {
-    day10_syntax_scoring();
+    Day11 day11;
+    day11.Execute();
 
     return 0;
 }
