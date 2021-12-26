@@ -9,6 +9,117 @@
 
 #include "input.h"
 
+namespace Day13
+{
+    class Origami
+    {
+        struct Point
+        {
+            int x, y;
+
+            Point(int X, int Y) :
+                x(X), y(Y) {};
+
+            bool operator==(const Point& o) const
+            {
+                return x == o.x && y == o.y;
+            }
+            bool operator!=(const Point& o) const
+            {
+                return !operator==(o);
+            }
+        };
+
+        struct PointHash
+        {
+            std::size_t operator()(const Point& p) const
+            {
+                return size_t(p.x + p.y * 2048);
+            }
+        };
+
+        std::unordered_set<Point, PointHash> m_points;
+        int m_Width = 0;
+        int m_Height = 0;
+
+    public:
+        Origami()
+        {
+            for (auto point : g_points)
+            {
+                m_points.emplace(point[0], point[1]);
+            }
+        }
+
+        Point Reflect(FoldAxis axis, int loc, const Point p)
+        {
+            Point result = p;
+            switch (axis)
+            {
+            case FoldAxis::x:
+                m_Width = loc;
+                if (result.x > loc)
+                    result.x = loc * 2 - result.x;
+                break;
+
+            case FoldAxis::y:
+                m_Height = loc;
+                if(result.y > loc)
+                    result.y = loc * 2 - result.y;
+                break;
+            }
+
+            return result;
+        }
+
+        void Fold(FoldAxis axis, int loc)
+        {
+            std::unordered_set<Point, PointHash> temp;
+            
+            // Add fold results to temp set and remove folded points
+            for (auto it = m_points.begin(); it != m_points.end(); )
+            {
+                const Point& point = *it;
+                Point p = Reflect(axis, loc, point);
+                if (p != point)
+                {
+                    temp.emplace(p);
+                    it = m_points.erase(it);
+                }
+                else
+                {
+                    ++it;
+                }
+            }
+
+            // Combine fold results with existing set
+            m_points.merge(temp);
+        }
+
+        void Execute()
+        {
+            for (Day13::Fold f : g_folds)
+            {
+                Fold(f.axis, f.location);
+                std::cout << "Visible=" << m_points.size() << std::endl;
+            }
+
+            for (auto row = 0; row < m_Height; ++row)
+            {
+                for (auto col = 0; col < m_Width; ++col)
+                {
+                    auto it = m_points.find(Point(col, row));
+                    if (it == m_points.end())
+                        std::cout << '.';
+                    else
+                        std::cout << '#';
+                }
+                std::cout << std::endl;
+            }
+        }
+    };
+}
+
 namespace Day12
 {
     struct CaveNode
@@ -134,8 +245,8 @@ namespace Day12
 
 int main(int argc, char *argv[])
 {
-    Day12::PassagePathing passagePathing;
-    passagePathing.Execute();
+    Day13::Origami origami;
+    origami.Execute();
 
     return 0;
 }
