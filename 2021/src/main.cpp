@@ -9,6 +9,70 @@
 
 #include "input.h"
 
+namespace Day14
+{
+    class Polymerization
+    {
+        std::string m_template;
+        std::unordered_map<std::string, char> m_rules;
+    
+    public:
+        Polymerization()
+        {
+            m_template =g_template;
+
+            for (const auto &rule : g_rules)
+            {
+                m_rules.emplace(rule.substr(0, 2), rule[4]);
+            }
+        }
+
+        void Execute()
+        {
+            for (int step = 0; step < 10; ++step)
+            {
+                int length = m_template.length();
+                std::string temp;
+                for (int i = 0; i < length - 1; ++i)
+                {
+                    std::string pair = m_template.substr(i, 2);
+                    char c = m_rules[pair];
+                    temp.push_back(m_template[i]);
+                    temp.push_back(c);
+                }
+                temp.push_back(m_template.back());
+                m_template = temp;
+            }
+
+            // Count each of the elements
+            std::unordered_map<char, int> elementCounts;
+            for (auto c : m_template)
+            {
+                elementCounts[c]++;
+            }
+
+            int most = 0;
+            int least = INT_MAX;
+            for (const auto &e : elementCounts)
+            {
+                if (e.second < least)
+                {
+                    least = e.second;
+                }
+
+                if (e.second > most)
+                {
+                    most = e.second;
+                }
+            }
+
+            std::cout << "Most=" << most << std::endl;
+            std::cout << "Least=" << least << std::endl;
+            std::cout << "Delta=" << most - least << std::endl;
+        }
+    };
+}
+
 namespace Day13
 {
     class Origami
@@ -245,8 +309,8 @@ namespace Day12
 
 int main(int argc, char *argv[])
 {
-    Day13::Origami origami;
-    origami.Execute();
+    Day14::Polymerization puzzle;
+    puzzle.Execute();
 
     return 0;
 }
