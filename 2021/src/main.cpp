@@ -13,61 +13,115 @@ namespace Day14
 {
     class Polymerization
     {
-        std::string m_template;
-        std::unordered_map<std::string, char> m_rules;
-    
+        static uint16_t AsPairKey(const char* pair)
+        {
+            return *(reinterpret_cast<const uint16_t*>(pair));
+        }
+
+        static size_t AsCounterKey(uint16_t pairKey, uint16_t level)
+        {
+            return pairKey + level * 65536;
+        }
+
+        struct Counter
+        {
+            uint64_t Counts[32] = { 0 };
+        };
+        std::unordered_map<size_t, Counter> m_counts;
+        std::unordered_map<uint16_t, char> m_rules;
+        const int m_maxDepth = 40;
+
     public:
         Polymerization()
         {
-            m_template =g_template;
-
-            for (const auto &rule : g_rules)
+            for (const char *rule : g_rules)
             {
-                m_rules.emplace(rule.substr(0, 2), rule[4]);
+                uint16_t ruleKey = AsPairKey(rule);
+                m_rules.emplace(ruleKey, rule[4]);
             }
+        }
+
+        const Counter &Expand(int depth, const char* pChars)
+        {
+            uint16_t level = uint16_t(depth);
+            size_t counterKey = AsCounterKey(AsPairKey(pChars), level);
+
+            auto it = m_counts.find(counterKey);
+            if (it != m_counts.end())
+                return it->second;
+
+            auto result = m_counts.emplace(counterKey, Counter());
+            it = result.first;
+
+            Counter& counter = it->second;
+
+            if (depth < m_maxDepth)
+            {
+                uint16_t ruleKey = AsPairKey(pChars);
+                char next[3];
+                next[0] = pChars[0];
+                next[1] = m_rules[ruleKey];
+                next[2] = pChars[1];
+                const Counter &left = Expand(depth + 1, &next[0]);
+                const Counter& right = Expand(depth + 1, &next[1]);
+
+                for (size_t accIndex = 0; accIndex < 32; ++accIndex)
+                {
+                    counter.Counts[accIndex] += left.Counts[accIndex] + right.Counts[accIndex];
+                }
+            }
+            else
+            {
+                size_t index = pChars[0] - 'A';
+                counter.Counts[index]++;
+            }
+
+            return counter;
         }
 
         void Execute()
         {
-            for (int step = 0; step < 10; ++step)
+            Counter rootCounter;
+            const int lastIndex = sizeof(g_template) - 2;
+            for (int i = 0; i < lastIndex; ++i)
             {
-                int length = m_template.length();
-                std::string temp;
-                for (int i = 0; i < length - 1; ++i)
+                // Decode rules using depth-first and count elements
+                const Counter &left = Expand(0, &g_template[i]);
+                for (size_t accIndex = 0; accIndex < 32; ++accIndex)
                 {
-                    std::string pair = m_template.substr(i, 2);
-                    char c = m_rules[pair];
-                    temp.push_back(m_template[i]);
-                    temp.push_back(c);
-                }
-                temp.push_back(m_template.back());
-                m_template = temp;
-            }
-
-            // Count each of the elements
-            std::unordered_map<char, int> elementCounts;
-            for (auto c : m_template)
-            {
-                elementCounts[c]++;
-            }
-
-            int most = 0;
-            int least = INT_MAX;
-            for (const auto &e : elementCounts)
-            {
-                if (e.second < least)
-                {
-                    least = e.second;
-                }
-
-                if (e.second > most)
-                {
-                    most = e.second;
+                    rootCounter.Counts[accIndex] += left.Counts[accIndex];
                 }
             }
 
-            std::cout << "Most=" << most << std::endl;
-            std::cout << "Least=" << least << std::endl;
+            // Count the last element
+            rootCounter.Counts[g_template[lastIndex] - 'A']++;
+//            std::cout << g_template[lastIndex] << std::endl;
+
+            uint64_t most = 0;
+            uint64_t least = UINT64_MAX;
+            char mostLetter = 0;
+            char leastLetter = 0;
+            for (char index = 0; index < 32; ++index)
+            {
+                uint64_t count = rootCounter.Counts[index];
+                if (count > 0)
+                {
+                    if (count < least)
+                    {
+                        least = count;
+                        leastLetter = index + 'A';
+                    }
+
+                    if (count > most)
+                    {
+                        most = count;
+                        mostLetter = index + 'A';
+                    }
+                }
+            }
+
+            std::cout << "Most=" << most << "(" << mostLetter << ")" << std::endl;
+            std::cout << "Least=" << least << "(" << leastLetter << ")" << std::endl;
             std::cout << "Delta=" << most - least << std::endl;
         }
     };
