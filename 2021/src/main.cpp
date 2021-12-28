@@ -14,15 +14,15 @@ const auto MAX_SIZE_T = std::numeric_limits<size_t>::max();
 
 namespace Day15
 {
-	size_t CoordToIndex(int coord[2])
+	size_t CoordToIndex(int maxWidth, int coord[2])
 	{
-		return g_CavernWidth * coord[1] + coord[0];
+		return maxWidth * coord[1] + coord[0];
 	}
 
-	void IndexToCoord(size_t index, int coord[2])
+	void IndexToCoord(int maxWidth, size_t index, int coord[2])
 	{
-		int y = int(index / g_CavernWidth);
-		int x = int(index - y * g_CavernWidth);
+		int y = int(index / maxWidth);
+		int x = int(index - y * maxWidth);
 		coord[0] = x;
 		coord[1] = y;
 	}
@@ -57,47 +57,84 @@ namespace Day15
 		};
 		std::priority_queue<Edge, std::vector<Edge>, Edge::Greater> m_EdgeQueue;
 
+		static int CavernWidth() { return 5 * g_CavernWidth; }
+		static int CavernLength() { return 5 * g_CavernLength; }
+		static size_t CavernSize() { return CavernWidth() * CavernLength(); }
+
+		static int Risk(size_t index)
+		{
+			int coord[2];
+			IndexToCoord(CavernWidth(), index, coord);
+			int SourceCoord[2];
+			SourceCoord[0] = coord[0] % g_CavernWidth;
+			SourceCoord[1] = coord[1] % g_CavernLength;
+			size_t SourceIndex = CoordToIndex(g_CavernWidth, SourceCoord);
+			int SourceRisk = g_Risk[SourceIndex];
+			int RiskInc = coord[0] / g_CavernWidth + coord[1] / g_CavernLength;
+			return (((SourceRisk + RiskInc) - 1) % 9) + 1;
+		}
+
 	public:
 		Chiton()
 		{
 			// Build node graph
-			for(size_t i = 0; i < g_CavernSize; ++i)
+			for(size_t i = 0; i < CavernSize(); ++i)
 			{
 				Node &node = m_Nodes.emplace_back();
 				int coord[2];
-				IndexToCoord(i, coord);
+				IndexToCoord(CavernWidth(), i, coord);
 				if(coord[0] > 0)
-				{
+				{ 
 					int neighborCoord[2] = { coord[0] - 1, coord[1] };
-					node.Neighbors[node.NumNeighbors] = CoordToIndex(neighborCoord);
+					node.Neighbors[node.NumNeighbors] = CoordToIndex(CavernWidth(), neighborCoord);
 					node.NumNeighbors++;
 				}
-				if(coord[0] < g_CavernWidth - 1)
+				if(coord[0] < CavernWidth() - 1) 
 				{
 					int neighborCoord[2] = { coord[0] + 1, coord[1] };
-					node.Neighbors[node.NumNeighbors] = CoordToIndex(neighborCoord);
+					node.Neighbors[node.NumNeighbors] = CoordToIndex(CavernWidth(), neighborCoord);
 					node.NumNeighbors++;
 				}
 				if(coord[1] > 0)
 				{
 					int neighborCoord[2] = { coord[0], coord[1] - 1 };
-					node.Neighbors[node.NumNeighbors] = CoordToIndex(neighborCoord);
+					node.Neighbors[node.NumNeighbors] = CoordToIndex(CavernWidth(), neighborCoord);
 					node.NumNeighbors++;
 				}
-				if(coord[1] < g_CavernLength - 1)
+				if(coord[1] < CavernLength() - 1)
 				{
 					int neighborCoord[2] = { coord[0], coord[1] + 1 };
-					node.Neighbors[node.NumNeighbors] = CoordToIndex(neighborCoord);
+					node.Neighbors[node.NumNeighbors] = CoordToIndex(CavernWidth(), neighborCoord);
 					node.NumNeighbors++;
 				}
+				//if (i > 0)
+				//{
+				//	if (0 == (coord[0] % CavernWidth()))
+				//	{
+				//		std::cout << std::endl;
+
+				//		if (0 == coord[1] % g_CavernLength)
+				//			std::cout << std::endl;
+				//	}
+				//	else
+				//	{
+				//		if (0 == (coord[0] % g_CavernWidth))
+				//		{
+				//			std::cout << " ";
+				//		}
+				//	}
+				//}
+
+				//std::cout << Risk(i);
 			}
+			//std::cout << std::endl;
 		}
 
 		size_t Dijkstras(size_t startIndex, size_t endIndex)
 		{
 			// Add the start node cost to the priority queue
-			m_Visited.resize(g_CavernSize, false);
-			m_Costs.resize(g_CavernSize, MAX_SIZE_T);
+			m_Visited.resize(CavernSize(), false);
+			m_Costs.resize(CavernSize(), MAX_SIZE_T);
 			m_Costs[startIndex] = 0;
 			m_EdgeQueue.emplace(0, startIndex);
 
@@ -117,7 +154,7 @@ namespace Day15
 				for (int i = 0; i < node.NumNeighbors; ++i)
 				{
 					size_t NeighborIndex = node.Neighbors[i];
-					size_t NewCost = m_Costs[Index] + g_Risk[NeighborIndex];
+					size_t NewCost = m_Costs[Index] + Risk(NeighborIndex);
 					if (NewCost < m_Costs[NeighborIndex])
 					{
 						m_Costs[NeighborIndex] = NewCost;
@@ -131,8 +168,9 @@ namespace Day15
 
 		void Execute()
 		{
-			size_t StartIndex = CoordToIndex(g_StartCoord);
-			size_t EndIndex = CoordToIndex(g_EndCoord);
+
+			size_t StartIndex = 0;
+			size_t EndIndex = CavernSize() - 1;
 
 			size_t Cost = Dijkstras(StartIndex, EndIndex);
 
