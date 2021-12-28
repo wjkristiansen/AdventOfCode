@@ -1,370 +1,150 @@
 #include <iostream>
-#include <unordered_set>
-#include <list>
-#include <deque>
-#include <unordered_map>
+#include <vector>
 #include <algorithm>
+#include <map>
+#include <set>
+#include <queue>
+#include <unordered_set>
 
 #include <assert.h>
 
 #include "input.h"
 
-namespace Day14
+const auto MAX_SIZE_T = std::numeric_limits<size_t>::max();
+
+namespace Day15
 {
-    class Polymerization
-    {
-        static uint16_t AsPairKey(const char* pair)
-        {
-            return *(reinterpret_cast<const uint16_t*>(pair));
-        }
+	size_t CoordToIndex(int coord[2])
+	{
+		return g_CavernWidth * coord[1] + coord[0];
+	}
 
-        static size_t AsCounterKey(uint16_t pairKey, uint16_t level)
-        {
-            return pairKey + level * 65536;
-        }
+	void IndexToCoord(size_t index, int coord[2])
+	{
+		int y = int(index / g_CavernWidth);
+		int x = int(index - y * g_CavernWidth);
+		coord[0] = x;
+		coord[1] = y;
+	}
 
-        struct Counter
-        {
-            uint64_t Counts[32] = { 0 };
-        };
-        std::unordered_map<size_t, Counter> m_counts;
-        std::unordered_map<uint16_t, char> m_rules;
-        const int m_maxDepth = 40;
+	struct Node
+	{
+		int NumNeighbors = 0;
+		size_t Neighbors[4] = {};
+	};
 
-    public:
-        Polymerization()
-        {
-            for (const char *rule : g_rules)
-            {
-                uint16_t ruleKey = AsPairKey(rule);
-                m_rules.emplace(ruleKey, rule[4]);
-            }
-        }
+	class Chiton
+	{ 
+		std::vector<Node> m_Nodes;
+		std::vector<bool> m_Visited;
+		std::vector<size_t> m_Costs;
+		struct Edge
+		{
+			size_t Cost;
+			size_t DestIndex;
 
-        const Counter &Expand(int depth, const char* pChars)
-        {
-            uint16_t level = uint16_t(depth);
-            size_t counterKey = AsCounterKey(AsPairKey(pChars), level);
+			Edge(size_t cost, size_t destIndex) :
+				Cost(cost),
+				DestIndex(destIndex) {}
 
-            auto it = m_counts.find(counterKey);
-            if (it != m_counts.end())
-                return it->second;
+			struct Greater
+			{
+				bool operator()(const Edge& e1, const Edge& e2)
+				{
+					return e1.Cost > e2.Cost;
+				}
+			};
+		};
+		std::priority_queue<Edge, std::vector<Edge>, Edge::Greater> m_EdgeQueue;
 
-            auto result = m_counts.emplace(counterKey, Counter());
-            it = result.first;
+	public:
+		Chiton()
+		{
+			// Build node graph
+			for(size_t i = 0; i < g_CavernSize; ++i)
+			{
+				Node &node = m_Nodes.emplace_back();
+				int coord[2];
+				IndexToCoord(i, coord);
+				if(coord[0] > 0)
+				{
+					int neighborCoord[2] = { coord[0] - 1, coord[1] };
+					node.Neighbors[node.NumNeighbors] = CoordToIndex(neighborCoord);
+					node.NumNeighbors++;
+				}
+				if(coord[0] < g_CavernWidth - 1)
+				{
+					int neighborCoord[2] = { coord[0] + 1, coord[1] };
+					node.Neighbors[node.NumNeighbors] = CoordToIndex(neighborCoord);
+					node.NumNeighbors++;
+				}
+				if(coord[1] > 0)
+				{
+					int neighborCoord[2] = { coord[0], coord[1] - 1 };
+					node.Neighbors[node.NumNeighbors] = CoordToIndex(neighborCoord);
+					node.NumNeighbors++;
+				}
+				if(coord[1] < g_CavernLength - 1)
+				{
+					int neighborCoord[2] = { coord[0], coord[1] + 1 };
+					node.Neighbors[node.NumNeighbors] = CoordToIndex(neighborCoord);
+					node.NumNeighbors++;
+				}
+			}
+		}
 
-            Counter& counter = it->second;
+		size_t Dijkstras(size_t startIndex, size_t endIndex)
+		{
+			// Add the start node cost to the priority queue
+			m_Visited.resize(g_CavernSize, false);
+			m_Costs.resize(g_CavernSize, MAX_SIZE_T);
+			m_Costs[startIndex] = 0;
+			m_EdgeQueue.emplace(0, startIndex);
 
-            if (depth < m_maxDepth)
-            {
-                uint16_t ruleKey = AsPairKey(pChars);
-                char next[3];
-                next[0] = pChars[0];
-                next[1] = m_rules[ruleKey];
-                next[2] = pChars[1];
-                const Counter &left = Expand(depth + 1, &next[0]);
-                const Counter& right = Expand(depth + 1, &next[1]);
+			while (!m_EdgeQueue.empty())
+			{
+				Edge edge = m_EdgeQueue.top();
+				m_EdgeQueue.pop();
+				size_t Index = edge.DestIndex;
+				if (m_Visited[Index]) continue;
+				m_Visited[Index] = true;
+				if (Index == endIndex)
+				{
+					return m_Costs[Index];
+				}
+				const Node& node = m_Nodes[Index];
 
-                for (size_t accIndex = 0; accIndex < 32; ++accIndex)
-                {
-                    counter.Counts[accIndex] += left.Counts[accIndex] + right.Counts[accIndex];
-                }
-            }
-            else
-            {
-                size_t index = pChars[0] - 'A';
-                counter.Counts[index]++;
-            }
+				for (int i = 0; i < node.NumNeighbors; ++i)
+				{
+					size_t NeighborIndex = node.Neighbors[i];
+					size_t NewCost = m_Costs[Index] + g_Risk[NeighborIndex];
+					if (NewCost < m_Costs[NeighborIndex])
+					{
+						m_Costs[NeighborIndex] = NewCost;
+						m_EdgeQueue.emplace(NewCost, NeighborIndex);
+					}
+				}
+			}
 
-            return counter;
-        }
+			return MAX_SIZE_T;
+		}
 
-        void Execute()
-        {
-            Counter rootCounter;
-            const int lastIndex = sizeof(g_template) - 2;
-            for (int i = 0; i < lastIndex; ++i)
-            {
-                // Decode rules using depth-first and count elements
-                const Counter &left = Expand(0, &g_template[i]);
-                for (size_t accIndex = 0; accIndex < 32; ++accIndex)
-                {
-                    rootCounter.Counts[accIndex] += left.Counts[accIndex];
-                }
-            }
+		void Execute()
+		{
+			size_t StartIndex = CoordToIndex(g_StartCoord);
+			size_t EndIndex = CoordToIndex(g_EndCoord);
 
-            // Count the last element
-            rootCounter.Counts[g_template[lastIndex] - 'A']++;
-//            std::cout << g_template[lastIndex] << std::endl;
+			size_t Cost = Dijkstras(StartIndex, EndIndex);
 
-            uint64_t most = 0;
-            uint64_t least = UINT64_MAX;
-            char mostLetter = 0;
-            char leastLetter = 0;
-            for (char index = 0; index < 32; ++index)
-            {
-                uint64_t count = rootCounter.Counts[index];
-                if (count > 0)
-                {
-                    if (count < least)
-                    {
-                        least = count;
-                        leastLetter = index + 'A';
-                    }
-
-                    if (count > most)
-                    {
-                        most = count;
-                        mostLetter = index + 'A';
-                    }
-                }
-            }
-
-            std::cout << "Most=" << most << "(" << mostLetter << ")" << std::endl;
-            std::cout << "Least=" << least << "(" << leastLetter << ")" << std::endl;
-            std::cout << "Delta=" << most - least << std::endl;
-        }
-    };
+			std::cout << "Min cost=" << Cost << std::endl;
+		}
+	};
 }
 
-namespace Day13
+int main()
 {
-    class Origami
-    {
-        struct Point
-        {
-            int x, y;
+	Day15::Chiton puzzle;
+	puzzle.Execute();
 
-            Point(int X, int Y) :
-                x(X), y(Y) {};
-
-            bool operator==(const Point& o) const
-            {
-                return x == o.x && y == o.y;
-            }
-            bool operator!=(const Point& o) const
-            {
-                return !operator==(o);
-            }
-        };
-
-        struct PointHash
-        {
-            std::size_t operator()(const Point& p) const
-            {
-                return size_t(p.x + p.y * 2048);
-            }
-        };
-
-        std::unordered_set<Point, PointHash> m_points;
-        int m_Width = 0;
-        int m_Height = 0;
-
-    public:
-        Origami()
-        {
-            for (auto point : g_points)
-            {
-                m_points.emplace(point[0], point[1]);
-            }
-        }
-
-        Point Reflect(FoldAxis axis, int loc, const Point p)
-        {
-            Point result = p;
-            switch (axis)
-            {
-            case FoldAxis::x:
-                m_Width = loc;
-                if (result.x > loc)
-                    result.x = loc * 2 - result.x;
-                break;
-
-            case FoldAxis::y:
-                m_Height = loc;
-                if(result.y > loc)
-                    result.y = loc * 2 - result.y;
-                break;
-            }
-
-            return result;
-        }
-
-        void Fold(FoldAxis axis, int loc)
-        {
-            std::unordered_set<Point, PointHash> temp;
-            
-            // Add fold results to temp set and remove folded points
-            for (auto it = m_points.begin(); it != m_points.end(); )
-            {
-                const Point& point = *it;
-                Point p = Reflect(axis, loc, point);
-                if (p != point)
-                {
-                    temp.emplace(p);
-                    it = m_points.erase(it);
-                }
-                else
-                {
-                    ++it;
-                }
-            }
-
-            // Combine fold results with existing set
-            m_points.merge(temp);
-        }
-
-        void Execute()
-        {
-            for (Day13::Fold f : g_folds)
-            {
-                Fold(f.axis, f.location);
-                std::cout << "Visible=" << m_points.size() << std::endl;
-            }
-
-            for (auto row = 0; row < m_Height; ++row)
-            {
-                for (auto col = 0; col < m_Width; ++col)
-                {
-                    auto it = m_points.find(Point(col, row));
-                    if (it == m_points.end())
-                        std::cout << '.';
-                    else
-                        std::cout << '#';
-                }
-                std::cout << std::endl;
-            }
-        }
-    };
-}
-
-namespace Day12
-{
-    struct CaveNode
-    {
-        int VisitCount = 0;
-        bool IsLarge = false;
-        std::string Name;
-        std::vector<int> NeighborIndices;
-
-        CaveNode(const std::string& name) :
-            Name(name)
-        {
-            IsLarge = name[0] >= 'A' && name[0] <= 'Z';
-        }
-    };
-
-    class PassagePathing
-    {
-    public:
-
-        std::vector<CaveNode> m_caveNodes;
-        std::unordered_map<std::string, int> m_indexMap;
-        int m_startIndex = 0;
-        int m_endIndex = 0;
-        int m_pathCount = 0;
-        int m_smallExtra = -1;
-
-        int GetCaveNodeIndex(const std::string& name)
-        {
-            auto it = m_indexMap.find(name);
-            if (it == m_indexMap.end())
-            {
-                // Add cave node
-                int index = static_cast<int>(m_caveNodes.size());
-                m_caveNodes.emplace_back(name);
-                auto insert = m_indexMap.emplace(name, index);
-                it = insert.first;
-
-                if (name == "start")
-                {
-                    m_startIndex = index;
-                }
-
-                if (name == "end")
-                {
-                    m_endIndex = index;
-                }
-            }
-
-            return it->second;
-        }
-
-        void ParseInput(const char* strings[], int numStrings)
-        {
-            for (int i = 0; i < numStrings; ++i)
-            {
-                std::string line(strings[i]);
-                int delim = line.find('-');
-                std::string name = line.substr(0, delim);
-                int index1 = GetCaveNodeIndex(name);
-                name = line.substr(delim + 1);
-                int index2 = GetCaveNodeIndex(name);
-                m_caveNodes[index1].NeighborIndices.push_back(index2);
-                m_caveNodes[index2].NeighborIndices.push_back(index1);
-            }
-        }
-
-        void CalcPaths(int nodeIndex, std::deque<int>& pathQueue)
-        {
-            CaveNode& node = m_caveNodes[nodeIndex];
-
-            if (!node.IsLarge)
-            {
-                if (node.VisitCount > 0)
-                {
-                    if (m_smallExtra < 0 && nodeIndex != m_startIndex && nodeIndex != m_endIndex)
-                        m_smallExtra = nodeIndex;
-                    else
-                        return;
-                }
-
-                if (node.VisitCount > 1 && m_smallExtra != nodeIndex)
-                    return;
-            }
-
-            pathQueue.push_back(nodeIndex);
-            node.VisitCount++;
-            for (int neighborIndex : node.NeighborIndices)
-            {
-                if (neighborIndex == m_endIndex)
-                {
-                    //for (auto segment : pathQueue)
-                    //{
-                    //    std::cout << m_caveNodes[segment].Name << ",";
-                    //}
-                    //std::cout << "end" << std::endl;
-
-                    m_pathCount++;
-                    continue;
-                }
-
-                CalcPaths(neighborIndex, pathQueue);
-            }
-            if (m_smallExtra == nodeIndex)
-            {
-                m_smallExtra = -1;
-            }
-            node.VisitCount--;
-            pathQueue.pop_back();
-        }
-
-        void Execute()
-        {
-            ParseInput(g_passages, _countof(g_passages));
-
-            std::deque<int> pathQueue;
-            CalcPaths(m_startIndex, pathQueue);
-
-            std::cout << "NumPaths=" << m_pathCount << std::endl;
-        }
-    };
-};
-
-int main(int argc, char *argv[])
-{
-    Day14::Polymerization puzzle;
-    puzzle.Execute();
-
-    return 0;
+	return 0;
 }
