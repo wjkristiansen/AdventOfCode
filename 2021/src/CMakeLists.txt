@@ -1,5 +1,7 @@
 add_executable(advent
-    main.cpp)
+    main.cpp
+    day15.cpp
+    day16.cpp)
 
 if(MSVC)
     target_compile_options(advent PRIVATE /W4 /WX)
