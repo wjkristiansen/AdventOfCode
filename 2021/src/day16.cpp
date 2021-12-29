@@ -116,12 +116,15 @@ namespace Day16
 				if (!(Value & 0x10))
 					break;
 			}
+
 			int Shift = 4 * (NumNibbles - 1);
+
 			for (int i = 0; i < NumNibbles; ++i)
 			{
-				Literal |= Nibbles[i] << Shift;
+				Literal |= uint64_t(Nibbles[i]) << Shift;
 				Shift -= 4;
 			}
+
 			return Literal;
 		}
 
@@ -135,8 +138,9 @@ namespace Day16
 			return ReadUInt8(3);
 		}
 
-		void ReadPacket(const std::string &indent, bool IsSubPacket)
+		size_t ReadPacket(const std::string &indent, bool IsSubPacket)
 		{
+			size_t Value = std::numeric_limits<size_t>::max();
 			int Version = ReadVersion();
 			m_SumOfVersions += Version;
 			int Type = ReadTypeId();
@@ -147,38 +151,76 @@ namespace Day16
 			std::cout << indent << " -Version: " << Version << std::endl;
 			std::cout << indent << " -TypeId: " << Type << std::endl;
 
-			switch (Type)
+			if (Type == 4)
 			{
-			case 4: {
-				uint64_t Literal = ReadLiteral();
-				std::cout << indent << "    Literal: " << Literal << std::endl;
-				break; }
-			default: {
-				// Operator packet
+				Value = ReadLiteral();
+			}
+			else
+			{
 				int SubTypeId = ReadUInt8(1);
 				std::string SubIndent = indent + "  ";
+				uint16_t SubPacketSizeInBits = 0;
+				size_t EndOffsetInBits = 0;
+				uint16_t NumSubPackets = 0;
 				if (SubTypeId == 0)
 				{
-					uint16_t SubPacketSizeInBits = ReadUInt16(15);
-					size_t CurOffsetInBits = m_Stream.GetOffsetInBits();
-					size_t EndOffsetInBits = CurOffsetInBits + SubPacketSizeInBits;
-					for (;m_Stream.GetOffsetInBits() < EndOffsetInBits;)
-					{
-						ReadPacket(SubIndent, true);
-					}
+					SubPacketSizeInBits = ReadUInt16(15);
+					EndOffsetInBits = m_Stream.GetOffsetInBits() + SubPacketSizeInBits;
 				}
 				else
 				{
-					uint16_t NumSubPackets = ReadUInt16(11);
-
-					for (uint16_t subIndex = 0; subIndex < NumSubPackets; ++subIndex)
-					{
-						ReadPacket(SubIndent, true);
-					}
+					NumSubPackets = ReadUInt16(11);
 				}
 
-				break; }
+				for (uint16_t SubIndex = 0; ; ++SubIndex)
+				{
+					if (SubTypeId == 0)
+					{
+						if (m_Stream.GetOffsetInBits() >= EndOffsetInBits)
+							break;
+					}
+					else
+					{
+						if (SubIndex == NumSubPackets)
+							break;
+					}
+
+					size_t SubPacketValue = ReadPacket(SubIndent, true);
+
+					switch (Type)
+					{
+					case 0: { // Sum packet
+						Value = SubIndex == 0 ? SubPacketValue : Value + SubPacketValue;
+						break; }
+					case 1: { // Product packet
+						Value = SubIndex == 0 ? SubPacketValue : SubPacketValue * Value;
+						break; }
+					case 2: { // Minimum packet
+						Value = SubIndex == 0 ? SubPacketValue : std::min(Value, SubPacketValue);
+						break; }
+					case 3: { // Maximum packet
+						Value = SubIndex == 0 ? SubPacketValue : std::max(Value, SubPacketValue);
+						break; }
+					case 5: { // Greater than packet
+						Value = SubIndex == 0 ? SubPacketValue : (Value > SubPacketValue ? 1 : 0);
+						break; }
+					case 6: { // Less than packet
+						Value = SubIndex == 0 ? SubPacketValue : (Value < SubPacketValue ? 1 : 0);
+						break; }
+					case 7: { // Equal to packet
+						Value = SubIndex == 0 ? SubPacketValue : (Value == SubPacketValue ? 1 : 0);
+						break; }
+					default: {
+						throw(std::exception());
+						break; }
+					}
+				}
 			}
+
+			std::cout << indent << " -Value: " << Value << std::endl;
+			assert(Value != std::numeric_limits<size_t>::max());
+
+			return Value;
 		}
 
 	public:
@@ -192,7 +234,9 @@ namespace Day16
 		{
 			try
 			{
-				ReadPacket("", false); // throws when stream is fully parsed
+				size_t Value = ReadPacket("", false); // throws when stream is fully parsed
+				std::cout << std::endl;
+				std::cout << "TotalValue: " << Value << std::endl;
 			}
 			catch (std::exception& )
 			{

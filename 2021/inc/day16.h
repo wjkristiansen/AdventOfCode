@@ -5,7 +5,7 @@ namespace Day16
     extern void Execute();
 
 #if 0
-    const char DataString[] = "A0016C880162017C3686B18A3D4780";
+    const char DataString[] = "9C0141080250320F1802104A08";
 #else
     const char DataString[] = 
         "A20D790042F1274011955491808B802F1C60B20030327AF2CC248AA800E7CDD726F3D"
