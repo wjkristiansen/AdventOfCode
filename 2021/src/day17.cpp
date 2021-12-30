@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include <map>
+#include <set>
 
 #include "day17.h"
 
@@ -30,11 +30,11 @@ namespace Day17
         // What goes up must come down, with Y-velocity equal
         // to -1 * Vy0. The next step after puts the velocity
         // at Vy0 + 1.
-        
+
         // Assuming the target is below the probe origin, the
         // fastest the probe can move without passing through
         // the target is -Target.min.y. Also, since the Y-velocity
-        // will increase by 1 after passing back through the origin, 
+        // will increase by 1 after passing back through the origin,
         // we can say Vy0 + 1 < -Target.min.y, or
         // Vy0 < -Target.min.y - 1.
 
@@ -53,11 +53,10 @@ namespace Day17
         int Peak = (N * (N + 1)) / 2;
         std::cout << "Peak=" << Peak << std::endl;
 
-        // Keeping the rest of this experimental code in case it is needed for part 2
-#if 0
-
         // Find initial values of Vx which produce an X position
         // between minX and maxX inclusive
+
+        std::set<std::pair<int, int>> Solutions;
 
         int MaxXVel = Target.max.x;
         int MinXVel = MaxXVel;
@@ -85,58 +84,38 @@ namespace Day17
         }
 
         // Store all possible Y values in a priority queue starting with max Y
-        int MaxYVel = 0;
-        int HighestMaxYVel = Target.min.y > 0 ? Target.max.y : -(Target.min.y - 1);
-        int YMax = Target.min.y;
-        for (int V0 = HighestMaxYVel; V0 >= Target.min.y ; V0--)
+        int MaxYVel = Target.min.y > 0 ? Target.max.y : -(Target.min.y) - 1;
+        for (int Vy0 = MaxYVel; Vy0 >= Target.min.y; Vy0--)
         {
-            int Y = 0;
-            int Vy = V0;
-            int Peak = 0;
-            for (int Step = 1; ; ++Step)
+            for (int Vx0 = MaxXVel; Vx0 >= MinXVel; Vx0--)
             {
-                Y += Vy;
-
-                Peak = std::max(Y, Peak);
-
-                if (Y < Target.min.y && Vy < 0)
-                    break;
-
-                Vy -= 1;
-
-                if (Y <= Target.max.y)
+                int Y = 0;
+                int X = 0;
+                int Vy = Vy0;
+                int Vx = Vx0;
+                for (int Step = 1; ; ++Step)
                 {
-                    bool found = false;
-                    int X0 = 0;
-                    // Is there a valid X0 that gets in range at the given step?
-                    for (X0 = MinXVel; X0 < MaxXVel; ++X0)
+                    Y += Vy;
+                    X += Vx;
+                    Vy -= 1;
+                    Vx = std::max(0, Vx - 1);
+
+                    if (Vy < 0 && Y < Target.min.y)
+                        break;
+                    if (X > Target.max.x)
+                        break;
+
+                    if (Y >= Target.min.y && Y <= Target.max.y && X >= Target.min.x)
                     {
-                        int X = 0;
-                        int Vx = X0;
-                        for (int S = 0; S < Step; ++S)
+                        auto it = Solutions.emplace(Vx0, Vy0);
+                        if (it.second)
                         {
-                            X += Vx;
-                            if (Vx > 0)
-                                Vx--;
-                        }
-                        if (X >= Target.min.x && X <= Target.max.x)
-                        {
-                            MaxYVel = std::max(MaxYVel, V0);
-                            YMax = std::max(Peak, YMax);
-                            found = true;
-                            break;
+                            std::cout << Vx0 << ", " << Vy0 << std::endl;
                         }
                     }
-
-                    if (!found)
-                        break;
                 }
             }
-
-            if (Y > Target.max.y && Vy < 0)
-                break;
         }
-        std::cout << "MaxYVel=" << MaxYVel << std::endl;
-#endif
+        std::cout << "NumSolutions=" << Solutions.size() << std::endl;
     }
 }
