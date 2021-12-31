@@ -173,6 +173,7 @@ namespace Day18
                     pLeft->pParent = this;
                     pRight = std::make_unique <SnailfishNumber>(RightValue);
                     pRight->pParent = this;
+                    Value = 0;
 
                     return true;
                 }
@@ -248,8 +249,6 @@ namespace Day18
                 Value = o.Value;
             }
 
-            Reduce();
-            
             return *this;
         }
 
@@ -258,9 +257,11 @@ namespace Day18
             SnailfishNumber Sum;
 
             Sum.pLeft = std::make_unique<SnailfishNumber>(*this);
-            pLeft->pParent = &Sum;
+            Sum.pLeft->pParent = &Sum;
             Sum.pRight = std::make_unique<SnailfishNumber>(o);
-            pRight->pParent = &Sum;
+            Sum.pRight->pParent = &Sum;
+
+            Sum.Reduce();
 
             return Sum;
         }
@@ -280,16 +281,39 @@ namespace Day18
 
     void Execute()
     {
-        SnailfishNumber Sum(Day18::Numbers[0]);
-        std::cout << Sum.ToString() << std::endl;
-        for (size_t i = 1; i < _countof(Numbers); ++i)
+        int MaxMagnitude = 0;
+        std::vector<SnailfishNumber> Numbers;
+        for (const char *String : NumberStrings)
         {
-            SnailfishNumber Next(Day18::Numbers[i]);
-            std::cout << Next.ToString() << std::endl;
-            Sum = Sum + Next;
+            Numbers.emplace_back(String);
         }
 
-        std::cout << "Final sum: " << Sum.ToString() << std::endl;
-        std::cout << "Magnitude: " << Sum.Magnitude() << std::endl;
+        {
+            SnailfishNumber Sum(Numbers[0]);
+            std::cout << Sum.ToString() << std::endl;
+            for (size_t i = 1; i < Numbers.size(); ++i)
+            {
+                SnailfishNumber Next(Numbers[i]);
+                std::cout << Next.ToString() << std::endl;
+                Sum = Sum + Next;
+            }
+
+            std::cout << "Final sum: " << Sum.ToString() << std::endl;
+            std::cout << "Magnitude: " << Sum.Magnitude() << std::endl;
+        }
+
+        for (size_t i = 0; i < Numbers.size(); ++i)
+        {
+            for (size_t j = 0; j < Numbers.size(); ++j)
+            {
+                if (i != j)
+                {
+                    SnailfishNumber Sum = Numbers[i] + Numbers[j];
+                    int Magnitude = Sum.Magnitude();
+                    MaxMagnitude = std::max(MaxMagnitude, Magnitude);
+                }
+            }
+        }
+        std::cout << "MaxMagnitude: " << MaxMagnitude << std::endl;
     }
 }

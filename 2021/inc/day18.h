@@ -3,7 +3,7 @@
 namespace Day18
 {
 #if 0
-    const char* const Numbers[] =
+    const char* const NumberStrings[] =
     {
         "[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]",
         "[[[5,[2,8]],4],[5,[[9,9],0]]]",
@@ -17,7 +17,7 @@ namespace Day18
         "[[[[5,2],5],[8,[3,7]]],[[5,[7,5]],[4,4]]]",
     };
 #else
-    const char* const Numbers[] =
+    const char* const NumberStrings[] =
     {
         "[[8,8],5]",
         "[[[[9,0],1],4],[[3,6],[0,5]]]",
