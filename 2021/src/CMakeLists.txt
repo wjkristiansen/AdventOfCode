@@ -5,7 +5,8 @@ add_executable(advent
     day17.cpp
     day18.cpp
     day19.cpp
-    day20.cpp)
+    day20.cpp
+    day21.cpp)
 
 configure_file(day19test.txt ${CMAKE_CURRENT_BINARY_DIR}/day19test.txt)
 configure_file(day19.txt ${CMAKE_CURRENT_BINARY_DIR}/day19.txt)
