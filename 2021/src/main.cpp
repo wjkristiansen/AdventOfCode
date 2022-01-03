@@ -13,10 +13,11 @@
 #include "day17.h"
 #include "day18.h"
 #include "day19.h"
+#include "day20.h"
 
 int main()
 {
-	Day19::Execute();
+	Day20::Execute();
 	
 	return 0;
 }
