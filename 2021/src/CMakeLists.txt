@@ -6,12 +6,15 @@ add_executable(advent
     day18.cpp
     day19.cpp
     day20.cpp
-    day21.cpp)
+    day21.cpp
+    day22.cpp)
 
 configure_file(day19test.txt ${CMAKE_CURRENT_BINARY_DIR}/day19test.txt)
 configure_file(day19.txt ${CMAKE_CURRENT_BINARY_DIR}/day19.txt)
 configure_file(day20test.txt ${CMAKE_CURRENT_BINARY_DIR}/day20test.txt)
 configure_file(day20.txt ${CMAKE_CURRENT_BINARY_DIR}/day20.txt)
+configure_file(day22.txt ${CMAKE_CURRENT_BINARY_DIR}/day22.txt)
+configure_file(day22test.txt ${CMAKE_CURRENT_BINARY_DIR}/day22test.txt)
 
 if(MSVC)
     target_compile_options(advent PRIVATE /W4 /WX)
