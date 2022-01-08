@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <fstream>
 #include <string>
+#include <list>
 #include <assert.h>
 
 #include "CanvasMath.hpp"
@@ -10,179 +11,180 @@
 
 namespace Day22
 {
-    using Vector=Canvas::Math::TVector<int, 3>;
+    using Vector = Canvas::Math::TVector<int, 3>;
+    using Range = std::pair<int, int>;
 
-    struct OctNode
+    static constexpr bool RangesOverlap(const Range& Range1, const Range& Range2)
     {
-        bool State = false; // Only used if ChildNodes.size() == 0
-        std::vector<OctNode> ChildNodes;
+        return Range1.second > Range2.first && Range2.second > Range1.first;
+    }
 
-        OctNode(bool State) :
-            State(State) {}
+    struct Box
+    {
+        Range RangeX;
+        Range RangeY;
+        Range RangeZ;
+
+        Box(const Range& RangeX, const Range& RangeY, const Range& RangeZ) :
+            RangeX(RangeX),
+            RangeY(RangeY),
+            RangeZ(RangeZ) {}
+
+        constexpr bool OverlapsWith(const Box& o) const
+        {
+            return RangesOverlap(RangeX, o.RangeX) && RangesOverlap(RangeY, o.RangeY) && RangesOverlap(RangeZ, o.RangeZ);
+        }
+
+        constexpr bool IsDegenerate() const
+        {
+            return (RangeX.first >= RangeX.second) || (RangeY.first >= RangeY.second) || (RangeZ.first >= RangeZ.second);
+        }
+
+        constexpr size_t Volume() const
+        {
+            return size_t(RangeX.second - RangeX.first) * size_t(RangeY.second - RangeY.first) * size_t(RangeZ.second - RangeZ.first);
+        }
+
+        // Splits Box such int N new boxes with box CarveOut removed
+        std::vector<Box> CarveOutBox(const Box& CarveOut) const
+        {
+            std::vector<Box> result;
+            Box temp = *this;
+
+            if (temp.OverlapsWith(CarveOut) && !CarveOut.IsDegenerate() && !IsDegenerate())
+            {
+                // Does plane x=CarveOut.RangeX.first intersect?
+                if (CarveOut.RangeX.first > temp.RangeX.first && CarveOut.RangeX.first < temp.RangeX.second)
+                {
+                    // Carve out the Box slice created by the intersecting plane
+                    result.emplace_back(Range(temp.RangeX.first, CarveOut.RangeX.first), temp.RangeY, temp.RangeZ);
+                    assert(!result.back().IsDegenerate());
+
+                    // Remove the carved-out box from the source box
+                    temp.RangeX.first = CarveOut.RangeX.first;
+                    assert(!temp.IsDegenerate());
+                }
+
+                // Does plane x=CarveOut.RangeX.second intersect?
+                if (CarveOut.RangeX.second > temp.RangeX.first && CarveOut.RangeX.second < temp.RangeX.second)
+                {
+                    // Carve out the Box slice created by the intersecting plane
+                    result.emplace_back(Range(CarveOut.RangeX.second, temp.RangeX.second), temp.RangeY, temp.RangeZ);
+                    assert(!result.back().IsDegenerate());
+
+                    // Remove the carved-out box from the source box
+                    temp.RangeX.second = CarveOut.RangeX.second;
+                    assert(!temp.IsDegenerate());
+                }
+
+                // Does plane y=CarveOut.RangeY.first intersect?
+                if (CarveOut.RangeY.first > temp.RangeY.first && CarveOut.RangeY.first < temp.RangeY.second)
+                {
+                    // Carve out the Box slice created by the intersecting plane
+                    result.emplace_back(temp.RangeX, Range(temp.RangeY.first, CarveOut.RangeY.first), temp.RangeZ);
+                    assert(!result.back().IsDegenerate());
+
+                    // Remove the carved-out box from the source box
+                    temp.RangeY.first = CarveOut.RangeY.first;
+                    assert(!temp.IsDegenerate());
+                }
+
+                // Does plane y=CarveOut.RangeY.second intersect?
+                if (CarveOut.RangeY.second > temp.RangeY.first && CarveOut.RangeY.second < temp.RangeY.second)
+                {
+                    // Carve out the Box slice created by the intersecting plane
+                    result.emplace_back(temp.RangeX, Range(CarveOut.RangeY.second, temp.RangeY.second), temp.RangeZ);
+                    assert(!result.back().IsDegenerate());
+
+                    // Remove the carved-out box from the source box
+                    temp.RangeY.second = CarveOut.RangeY.second;
+                    assert(!temp.IsDegenerate());
+                }
+
+                // Does plane z=CarveOut.RangeY.first intersect?
+                if (CarveOut.RangeZ.first > temp.RangeZ.first && CarveOut.RangeZ.first < temp.RangeZ.second)
+                {
+                    // Carve out the Box slice created by the intersecting plane
+                    result.emplace_back(temp.RangeX, temp.RangeY, Range(temp.RangeZ.first, CarveOut.RangeZ.first));
+                    assert(!result.back().IsDegenerate());
+
+                    // Remove the carved-out box from the source box
+                    temp.RangeZ.first = CarveOut.RangeZ.first;
+                    assert(!temp.IsDegenerate());
+                }
+
+                // Does plane y=CarveOut.RangeZ.second intersect?
+                if (CarveOut.RangeZ.second > temp.RangeZ.first && CarveOut.RangeZ.second < temp.RangeZ.second)
+                {
+                    // Carve out the Box slice created by the intersecting plane
+                    result.emplace_back(temp.RangeX, temp.RangeY, Range(CarveOut.RangeZ.second, temp.RangeZ.second));
+                    assert(!result.back().IsDegenerate());
+
+                    // Remove the carved-out box from the source box
+                    temp.RangeZ.second = CarveOut.RangeZ.second;
+                    assert(!temp.IsDegenerate());
+                }
+            }
+
+            return result;
+        }
     };
 
-    // Octtree class. Nodes contain 0 or 8 child nodes indexed by relative octant coordinates:
-    // 
-    // 0 => +X, +Y, +Z
-    // 1 => -X, +Y, +Z
-    // 2 => -X, -Y, +Z
-    // 3 => +X, -Y, +Z
-    // 4 => +X, +Y, -Z
-    // 5 => -X, +Y, -Z
-    // 6 => -X, -Y, -Z
-    // 7 => +X, -Y, -Z
-    class COctSpace
+    std::ostream& operator<<(std::ostream& os, const Range& r)
     {
-        OctNode m_Root;
-        int m_MaxDepth; // Max dimension is 2 ^ m_MaxDepth
-        Vector m_RootMin;
+        os << "[" << r.first << "," << r.second << "]";
+        return os;
+    }
 
-        int DimensionMax() const { return 1UL << m_MaxDepth; }
-        int RangeMin() const { return -(DimensionMax() >> 1); }
-        int RangeMax() const { return RangeMin() + DimensionMax(); }
+    std::ostream& operator<<(std::ostream& os, const Box& b)
+    {
+        os << "X" << b.RangeX << ",Y" << b.RangeY << ",Z" << b.RangeZ;
+        return os;
+    }
 
-        void SplitNode(OctNode& Node)
-        {
-            if (Node.ChildNodes.size() == 0)
-            {
-                // Create 8 child nodes with the same state as given Node
-                Node.ChildNodes.resize(8, Node.State);
-            }
-        }
-
-        void MergeNode(OctNode& Node, bool State)
-        {
-            Node.ChildNodes.clear();
-            Node.State = State;
-        }
-
-        // Returns true if the result is a leaf node
-        bool RecurseSetCuboidState(OctNode& Node, const Vector& NodeMin, int NodeSize, const Vector& CuboidMin, const Vector& CuboidMax, bool State)
-        {
-            const Vector nodeMax = NodeMin + Vector(NodeSize - 1, NodeSize - 1, NodeSize - 1);
-
-            // Does the node intersect the cuboid?
-            if (nodeMax[0] < CuboidMin[0] ||
-                nodeMax[1] < CuboidMin[1] ||
-                nodeMax[2] < CuboidMin[2] ||
-                NodeMin[0] > CuboidMax[0] ||
-                NodeMin[1] > CuboidMax[1] ||
-                NodeMin[2] > CuboidMax[2])
-            {
-                // Node does not intersect so just return
-                return Node.ChildNodes.size() == 0;
-            }
-
-            // Is the node fully contained by the cuboid?
-            if (NodeMin[0] >= CuboidMin[0] &&
-                NodeMin[1] >= CuboidMin[1] &&
-                NodeMin[2] >= CuboidMin[2] &&
-                nodeMax[0] <= CuboidMax[0] &&
-                nodeMax[1] <= CuboidMax[1] &&
-                nodeMax[2] <= CuboidMax[2])
-            {
-                // Node range is fully contained by cuboid range.
-                // Set the node state to 'State' and clear child
-                // nodes.
-                MergeNode(Node, State);
-                return true;
-            }
-
-            assert(NodeSize > 1);
-
-            // Recurse down to each of the child nodes, splitting if necessary
-            SplitNode(Node);
-            int childSize = NodeSize >> 1;
-            bool allLeafNodes = true;
-            for (int id = 0; id < 8; ++id)
-            {
-                Vector childMin;
-
-                switch (id)
-                {
-                case 0:
-                    childMin = NodeMin + Vector(childSize, childSize, childSize);
-                    break;
-                case 1:
-                    childMin = NodeMin + Vector(0, childSize, childSize);
-                    break;
-                case 2:
-                    childMin = NodeMin + Vector(0, 0, childSize);
-                    break;
-                case 3:
-                    childMin = NodeMin + Vector(childSize, 0, childSize);
-                    break;
-                case 4:
-                    childMin = NodeMin + Vector(childSize, childSize, 0);
-                    break;
-                case 5:
-                    childMin = NodeMin + Vector(0, childSize, 0);
-                    break;
-                case 6:
-                    childMin = NodeMin + Vector(0, 0, 0);
-                    break;
-                case 7:
-                    childMin = NodeMin + Vector(childSize, 0, 0);
-                    break;
-                default:
-                    throw std::exception();
-                    break;
-                }
-
-                bool IsLeafNode = RecurseSetCuboidState(Node.ChildNodes[id], childMin, childSize, CuboidMin, CuboidMax, State);
-                allLeafNodes = allLeafNodes && IsLeafNode;
-            }
-
-            if (allLeafNodes)
-            {
-                int id = 0;
-                for (; id < 8; ++id)
-                {
-                    if (Node.ChildNodes[id].State != State)
-                        break;
-                }
-
-                if (id == 8)
-                {
-                    MergeNode(Node, State);
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        size_t RecurseCountImpl(const OctNode& Node, int NodeSize, bool State)
-        {
-            size_t Count = 0;
-
-            if (Node.ChildNodes.size() > 0)
-            {
-                assert(NodeSize > 1);
-                int childSize = NodeSize >> 1;
-                for (auto& Child : Node.ChildNodes)
-                {
-                    Count += RecurseCountImpl(Child, childSize, State);
-                }
-            }
-            else
-            {
-                if (Node.State == State)
-                {
-                    Count = NodeSize * NodeSize * NodeSize;
-                }
-            }
-
-            return Count;
-        }
+    class CCubeSpace
+    {
+        std::list<Box> m_Boxes;
 
     public:
-        COctSpace(int MaxDepth) :
-            m_MaxDepth(MaxDepth),
-            m_Root(false)
+        void RemoveBox(const Box& b)
         {
-            assert(MaxDepth < 32);
-            m_RootMin = Vector(RangeMin(), RangeMin(), RangeMin());
+            for (auto it = m_Boxes.begin(); it != m_Boxes.end(); )
+            {
+                Box temp = *it;
+                if (temp.OverlapsWith(b))
+                {
+                    // Remove the box from the list
+                    it = m_Boxes.erase(it);
+
+                    // Insert the new boxes to the beginning of the list
+                    std::vector newBoxes = temp.CarveOutBox(b);
+                    m_Boxes.insert(m_Boxes.begin() , newBoxes.begin(), newBoxes.end());
+                }
+                else
+                {
+                    ++it;
+                }
+            }
+        }
+        void AddBox(const Box& b)
+        {
+            // Remove any box regions intersecting b
+            RemoveBox(b);
+
+            // Add b to the end of the list
+            m_Boxes.emplace_back(b);
+        }
+
+        size_t CountCubes() const
+        {
+            size_t count = 0;
+            for (const Box& b : m_Boxes)
+            {
+                count += b.Volume();
+            }
+
+            return count;
         }
 
         void ReadFile(const std::string& fileName, int limit)
@@ -196,6 +198,10 @@ namespace Day22
                 std::getline(fstream, line);
                 if (fstream.eof())
                     return;
+
+                // Ignore empty line
+                if (line == "")
+                    continue;
 
                 bool state = false;
                 if (line.rfind("on ", offset) == offset)
@@ -258,39 +264,21 @@ namespace Day22
                     ymin >= -limit && ymax <= limit &&
                     zmin >= -limit && zmax <= limit))
                 {
-                    SetCuboidState(Vector(xmin, ymin, zmin), Vector(xmax, ymax, zmax), state);
+                    Box box(Range(xmin, xmax + 1), Range(ymin, ymax + 1), Range(zmin, zmax + 1));
+                    if (state == true)
+                        AddBox(box);
+                    else
+                        RemoveBox(box);
                 }
             }
-        }
-
-        void SetCuboidState(const Vector& Min, const Vector& Max, bool State)
-        {
-            int rmin = RangeMin();
-            int rmax = RangeMax();
-            // Find or create all oct-tree nodes fully contained by range [Min, Max]
-            if (Max[0] > rmax || Max[1] > RangeMax() || Max[2] > RangeMax() ||
-                Min[0] < rmin || Min[1] < RangeMin() || Min[2] < RangeMin())
-                throw std::exception();
-            RecurseSetCuboidState(m_Root, m_RootMin, DimensionMax(), Min, Max, State);
-        }
-
-        size_t CountNodes(bool State)
-        {
-            return RecurseCountImpl(m_Root, DimensionMax(), State);
         }
     };
 
     void Execute()
     {
-        COctSpace OctSpace(20);
-        OctSpace.ReadFile("day22.txt", 50);
-
-        //OctSpace.SetCuboidState(Vector(10, 10, 10), Vector(12, 12, 12), true);
-        //OctSpace.SetCuboidState(Vector(11, 11, 11), Vector(13, 13, 13), true);
-        //OctSpace.SetCuboidState(Vector(9, 9, 9), Vector(11, 11, 11), false);
-        //OctSpace.SetCuboidState(Vector(10, 10, 10), Vector(10, 10, 10), true);
-
-        size_t onCount = OctSpace.CountNodes(true);
-        std::cout << "On count: " << onCount << std::endl;
+        CCubeSpace cubeSpace;
+        cubeSpace.ReadFile("day22.txt", 0);
+        size_t count = cubeSpace.CountCubes();
+        std::cout << "Num cubes: " << count << std::endl;
     }
 }
