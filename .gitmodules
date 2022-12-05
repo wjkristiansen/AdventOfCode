@@ -1,0 +1,3 @@
+[submodule "InCommand"]
+	path = InCommand
+	url = https://github.com/wjkristiansen/InCommand.git

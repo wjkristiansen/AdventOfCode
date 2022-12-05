@@ -17,7 +17,7 @@ endif()
 
 install(
     TARGETS advent21
-    DESTINATION ${CMAKE_SOURCE_DIR}/install
+    DESTINATION ${CMAKE_SOURCE_DIR}/install/2021/$<CONFIG>
     )
 
 install(
@@ -28,5 +28,5 @@ install(
         day20.txt
         day22.txt
         day22test.txt
-    DESTINATION ${CMAKE_SOURCE_DIR}/install/2021
+    DESTINATION ${CMAKE_SOURCE_DIR}/install/2021/$<CONFIG>
     )
