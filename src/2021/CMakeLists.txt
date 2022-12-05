@@ -1,4 +1,4 @@
-add_executable(advent
+add_executable(advent21
     main.cpp
     day15.cpp
     day16.cpp
@@ -17,8 +17,8 @@ configure_file(day22.txt ${CMAKE_CURRENT_BINARY_DIR}/day22.txt)
 configure_file(day22test.txt ${CMAKE_CURRENT_BINARY_DIR}/day22test.txt)
 
 if(MSVC)
-    target_compile_options(advent PRIVATE /W4 /WX)
+    target_compile_options(advent21 PRIVATE /W4 /WX)
 else()
-    target_compile_options(advent PRIVATE -Wall -Wextra -Werror)
+    target_compile_options(advent21 PRIVATE -Wall -Wextra -Werror)
 endif()
 
