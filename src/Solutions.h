@@ -36,3 +36,8 @@ public:
     static int DoRound(char Opponent, char Self);
     static int DoRound2(char Opponent, char Outcome );
 };
+
+class C2022Day3 : public CSolutionBase
+{
+    virtual void Execute(const std::string& Name);
+};

@@ -10,6 +10,7 @@ int main(int argc, const char *argv[])
     CSolutionFactory Factory;
     Factory.DeclareSolution<C2022Day1>(2022, 1, "Calorie Counting");
     Factory.DeclareSolution<C2022Day2>(2022, 2, "Rock Paper Scissors");
+    Factory.DeclareSolution<C2022Day3>(2022, 3, "Rucksack Reorganization");
 
     int MaxYear;
     int MaxDay;
