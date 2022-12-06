@@ -27,8 +27,12 @@ class C2022Day2 : public CSolutionBase
 public:
     virtual void Execute(const std::string& Name);
 
-    int DoRound(char Opponent, char Self );
-    int WinScore(char Self);
-    int LoseScore(char Self);
-    int DrawScore(char Self);
+    enum class Shape { Rock, Paper, Scissors };
+    enum class Result { Win, Lose, Draw };
+
+    static int ShapeValue(Shape shape);
+    static int ResultValue(Result result);
+
+    static int DoRound(char Opponent, char Self);
+    static int DoRound2(char Opponent, char Outcome );
 };

@@ -18,11 +18,41 @@ void C2022Day2::Execute(const std::string &Name)
         if(line.empty() || fstream.eof())
             break;
 
-        auto Score = DoRound(line[0], line[2]);
+        auto Score = DoRound2(line[0], line[2]);
         TotalScore += Score;
     }
 
     std::cout << "Total Score: " << TotalScore << std::endl;
+}
+
+int C2022Day2::ShapeValue(Shape shape)
+{
+    switch (shape)
+    {
+    case Shape::Rock:
+        return 1;
+    case Shape::Paper:
+        return 2;
+    case Shape::Scissors:
+        return 3;
+    }
+
+    return 0;
+}
+
+int C2022Day2::ResultValue(Result result)
+{
+    switch (result)
+    {
+    case Result::Win:
+        return 6;
+    case Result::Lose:
+        return 0;
+    case Result::Draw:
+        return 3;
+    }
+
+    return 0;
 }
 
 int C2022Day2::DoRound(char Opponent, char Self )
@@ -35,13 +65,13 @@ int C2022Day2::DoRound(char Opponent, char Self )
         switch(Self)
         {
         case 'X': // Rock
-            Score = DrawScore(Self);
+            Score = ResultValue(Result::Draw) + ShapeValue(Shape::Rock);
             break;
         case 'Y': // Paper
-            Score = WinScore(Self);
+            Score = ResultValue(Result::Win) + ShapeValue(Shape::Paper);
             break;
         case 'Z': // Scissor
-            Score = LoseScore(Self);
+            Score = ResultValue(Result::Lose) + ShapeValue(Shape::Scissors);
             break;
         }
         break;
@@ -49,13 +79,13 @@ int C2022Day2::DoRound(char Opponent, char Self )
         switch(Self)
         {
         case 'X': // Rock
-            Score = LoseScore(Self);
+            Score = ResultValue(Result::Lose) + ShapeValue(Shape::Rock);
             break;
         case 'Y': // Paper
-            Score = DrawScore(Self);
+            Score = ResultValue(Result::Draw) + ShapeValue(Shape::Paper);
             break;
         case 'Z': // Scissor
-            Score = WinScore(Self);
+            Score = ResultValue(Result::Win) + ShapeValue(Shape::Scissors);
             break;
         }
         break;
@@ -63,13 +93,13 @@ int C2022Day2::DoRound(char Opponent, char Self )
         switch(Self)
         {
         case 'X': // Rock
-            Score = WinScore(Self);
+            Score = ResultValue(Result::Win) + ShapeValue(Shape::Rock);
             break;
         case 'Y': // Paper
-            Score = LoseScore(Self);
+            Score = ResultValue(Result::Lose) + ShapeValue(Shape::Paper);
             break;
         case 'Z': // Scissor
-            Score = DrawScore(Self);
+            Score = ResultValue(Result::Draw) + ShapeValue(Shape::Scissors);
             break;
         }
         break;
@@ -78,47 +108,55 @@ int C2022Day2::DoRound(char Opponent, char Self )
     return Score;
 }
 
-int C2022Day2::WinScore(char Self)
+int C2022Day2::DoRound2(char Opponent, char Outcome)
 {
-    switch(Self)
+    int Score = 0;
+
+    switch (Opponent)
     {
-        case 'X':
-            return 1 + 6;
-        case 'Y':
-            return 2 + 6;
-        case 'Z':
-            return 3 + 6;
+    case 'A': // Rock
+        switch (Outcome)
+        {
+        case 'X': // Lose
+            Score = ShapeValue(Shape::Scissors) + ResultValue(Result::Lose);
+            break;
+        case 'Y': // Draw
+            Score = ShapeValue(Shape::Rock) + ResultValue(Result::Draw);
+            break;
+        case 'Z': // Win
+            Score = ShapeValue(Shape::Paper) + ResultValue(Result::Win);
+            break;
+        }
+        break;
+    case 'B': // Paper
+        switch (Outcome)
+        {
+        case 'X': // Lose
+            Score = ShapeValue(Shape::Rock) + ResultValue(Result::Lose);
+            break;
+        case 'Y': // Draw
+            Score = ShapeValue(Shape::Paper) + ResultValue(Result::Draw);
+            break;
+        case 'Z': // Win
+            Score = ShapeValue(Shape::Scissors) + ResultValue(Result::Win);
+            break;
+        }
+        break;
+    case 'C': // Scissor
+        switch (Outcome)
+        {
+        case 'X': // Lose
+            Score = ShapeValue(Shape::Paper) + ResultValue(Result::Lose);
+            break;
+        case 'Y': // Draw
+            Score = ShapeValue(Shape::Scissors) + ResultValue(Result::Draw);
+            break;
+        case 'Z': // Win
+            Score = ShapeValue(Shape::Rock) + ResultValue(Result::Win);
+            break;
+        }
+        break;
     }
 
-    return 0;
-}
-
-int C2022Day2::LoseScore(char Self)
-{
-    switch(Self)
-    {
-        case 'X':
-            return 1 + 0;
-        case 'Y':
-            return 2 + 0;
-        case 'Z':
-            return 3 + 0;
-    }
-
-    return 0;
-}
-
-int C2022Day2::DrawScore(char Self)
-{
-    switch(Self)
-    {
-        case 'X':
-            return 1 + 3;
-        case 'Y':
-            return 2 + 3;
-        case 'Z':
-            return 3 + 3;
-    }
-
-    return 0;
+    return Score;
 }
