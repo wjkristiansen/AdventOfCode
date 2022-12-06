@@ -1,9 +1,11 @@
-#include "..\Solutions.h"
+#include <iostream>
+#include <fstream>
+#include <string>
 
-void C2022Day4::Execute(const std::string &Name)
+#include "..\SolutionFactory.h"
+
+void CSolution<2022, 4>::Execute()
 {
-    std::cout << Name << std::endl;
-
     std::ifstream fstream("Day4.txt");
 
     size_t OverlappingCount = 0;

@@ -2,19 +2,19 @@
 #include <iostream>
 
 #include "SolutionFactory.h"
-#include "Solutions.h"
 
 // ------------------------------------------------------------------------------------------------
 int main(int argc, const char *argv[])
 {
     CSolutionFactory Factory;
-    Factory.DeclareSolution<C2022Day1>(2022, 1, "Calorie Counting");
-    Factory.DeclareSolution<C2022Day2>(2022, 2, "Rock Paper Scissors");
-    Factory.DeclareSolution<C2022Day3>(2022, 3, "Rucksack Reorganization");
-    Factory.DeclareSolution<C2022Day4>(2022, 4, "Camp Cleanup");
+    Factory.DeclareSolution<2022, 1>("Calorie Counting");
+    Factory.DeclareSolution<2022, 2>("Rock Paper Scissors");
+    Factory.DeclareSolution<2022, 3>("Rucksack Reorganization");
+    Factory.DeclareSolution<2022, 4>("Camp Cleanup");
+
     int MaxYear;
     int MaxDay;
-    Factory.MaxYearDay(MaxYear, MaxDay);
+    Factory.MaxDate(MaxYear, MaxDay);
 
     InCommand::CCommandReader CommandReader("advent", "Advent of Code", argc, argv);
     InCommand::InCommandInt Year(MaxYear);

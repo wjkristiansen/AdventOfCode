@@ -1,6 +1,11 @@
-#include "..\Solutions.h"
+#include <fstream>
+#include <string>
+#include <iostream>
+#include <vector>
 
-constexpr size_t Priority(char c)
+#include "..\SolutionFactory.h"
+
+static constexpr size_t Priority(char c)
 {
     if(c >= 'a' && c <= 'z')
         return 1 + size_t(c - 'a');
@@ -11,10 +16,8 @@ constexpr size_t Priority(char c)
     return 0;
 }
 
-void C2022Day3::Execute(const std::string &Name)
+void CSolution<2022, 3>::Execute()
 {
-    std::cout << Name << std::endl;
-
     std::ifstream fstream("Day3.txt");
 
     size_t SumOfPriorities = 0;

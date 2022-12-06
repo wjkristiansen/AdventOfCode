@@ -1,31 +1,13 @@
-#pragma once
+#include <fstream>
+#include <iostream>
+#include <string>
 
-#include "..\Solutions.h"
+#include "..\SolutionFactory.h"
 
-void C2022Day2::Execute(const std::string &Name)
-{
-	std::cout << Name << std::endl;
+enum class Shape {Rock, Paper, Scissors};
+enum class Result {Win, Lose, Draw};
 
-    std::ifstream fstream("Day2.txt");
-
-    size_t TotalScore = 0;
-
-    for(;;)
-    {
-        std::string line;
-        std::getline(fstream, line);
-
-        if(line.empty() || fstream.eof())
-            break;
-
-        auto Score = DoRound2(line[0], line[2]);
-        TotalScore += Score;
-    }
-
-    std::cout << "Total Score: " << TotalScore << std::endl;
-}
-
-int C2022Day2::ShapeValue(Shape shape)
+static int ShapeValue(Shape shape)
 {
     switch (shape)
     {
@@ -40,7 +22,7 @@ int C2022Day2::ShapeValue(Shape shape)
     return 0;
 }
 
-int C2022Day2::ResultValue(Result result)
+static int ResultValue(Result result)
 {
     switch (result)
     {
@@ -55,7 +37,7 @@ int C2022Day2::ResultValue(Result result)
     return 0;
 }
 
-int C2022Day2::DoRound(char Opponent, char Self )
+[[maybe_unused]] static int DoRound(char Opponent, char Self )
 {
     int Score = 0;
 
@@ -108,7 +90,7 @@ int C2022Day2::DoRound(char Opponent, char Self )
     return Score;
 }
 
-int C2022Day2::DoRound2(char Opponent, char Outcome)
+static int DoRound2(char Opponent, char Outcome)
 {
     int Score = 0;
 
@@ -159,4 +141,25 @@ int C2022Day2::DoRound2(char Opponent, char Outcome)
     }
 
     return Score;
+}
+
+void CSolution<2022, 2>::Execute()
+{
+    std::ifstream fstream("Day2.txt");
+
+    size_t TotalScore = 0;
+
+    for(;;)
+    {
+        std::string line;
+        std::getline(fstream, line);
+
+        if(line.empty() || fstream.eof())
+            break;
+
+        auto Score = DoRound2(line[0], line[2]);
+        TotalScore += Score;
+    }
+
+    std::cout << "Total Score: " << TotalScore << std::endl;
 }

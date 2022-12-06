@@ -1,16 +1,17 @@
 #include <map>
 #include <stdexcept>
 #include <memory>
+#include <iostream>
 
 #pragma once
 
 // ------------------------------------------------------------------------------------------------
-struct YearDay
+struct Date
 {
     int Year;
     int Day;
 
-    bool operator<(const YearDay &o) const
+    bool operator<(const Date &o) const
     {
         if(Year < o.Year)
             return true;
@@ -23,66 +24,51 @@ struct YearDay
 };
 
 // ------------------------------------------------------------------------------------------------
-class CSolutionBase
+template<int Year, int Day>
+class CSolution
 {
 public:
-    CSolutionBase() = default;
-    virtual ~CSolutionBase() = default;
-    virtual void Execute(const std::string &Name) = 0;
-};
-
-// ------------------------------------------------------------------------------------------------
-template<class Base>
-class CSolutionClass : public Base
-{
-    YearDay m_MaxYearDay;
-    std::string m_Name;
-
-public:
-    static std::unique_ptr<CSolutionBase> Create()
-    {
-        return std::make_unique<CSolutionClass<Base>>();
-    }
+    static void Execute();
 };
 
 // ------------------------------------------------------------------------------------------------
 struct SolutionDesc
 {
     std::string Name;
-    std::unique_ptr<CSolutionBase>(*FNCreate)();
+    void (*FnExecute)();
 };
 
 // ------------------------------------------------------------------------------------------------
 class CSolutionFactory
 {
-    std::map<YearDay, SolutionDesc> m_SolutionMap;
-    YearDay m_MaxYearDay = {};
+    std::map<Date, SolutionDesc> m_SolutionMap;
+    Date m_MaxDate = {};
 
 public:
-    template<class SolutionClass>
-    void DeclareSolution(int Year, int Day, const std::string &Name)
+    template<int Year, int Day>
+    void DeclareSolution(const std::string &Name)
     {
-        YearDay yearDay{ Year, Day };
-        auto [_, Success] = m_SolutionMap.emplace(yearDay, SolutionDesc{ Name, CSolutionClass<SolutionClass>::Create } );
+        auto [_, Success] = m_SolutionMap.emplace(Date{Year, Day}, SolutionDesc{Name, CSolution<Year, Day>::Execute});
         if(!Success)
         {
             throw(std::runtime_error("Solution for given year/day pair has already been declared."));
         }
 
-        m_MaxYearDay = std::max(yearDay, m_MaxYearDay);
+        m_MaxDate = std::max(Date{ Year, Day }, m_MaxDate);
     }
 
     void ExecuteSolution(int Year, int Day) const
     {
-        auto solutionIt = m_SolutionMap.find(YearDay{Year, Day});
+        auto solutionIt = m_SolutionMap.find(Date{Year, Day});
         if(solutionIt == m_SolutionMap.end())
             throw(std::runtime_error("No solution declared for year/day pair."));
 
+        std::cout << "Advent of Code " << Year << " Day " << Day << ": " << solutionIt->second.Name << std::endl;
+
         // Execute the solution
-        auto FnCreate = solutionIt->second.FNCreate;
-        std::unique_ptr<CSolutionBase> pSolution = FnCreate();
-        pSolution->Execute(solutionIt->second.Name);
+        auto FnExecute = solutionIt->second.FnExecute;
+        FnExecute();
     }
 
-    void MaxYearDay(int &Year, int &Day) { Year = m_MaxYearDay.Year; Day = m_MaxYearDay.Day; }
+    void MaxDate(int &Year, int &Day) { Year = m_MaxDate.Year; Day = m_MaxDate.Day; }
 };
