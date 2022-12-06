@@ -1,27 +1,8 @@
 #include <InCommand.h>
 #include <iostream>
 
-#include "Solution.h"
-
-// ------------------------------------------------------------------------------------------------
-class MySolution : public CSolutionBase
-{
-public:
-    virtual void Execute()
-    {
-        std::cout << "MySolution";
-    }
-};
-
-// ------------------------------------------------------------------------------------------------
-class MySolution2 : public CSolutionBase
-{
-public:
-    virtual void Execute()
-    {
-        std::cout << "MySolution2";
-    }
-};
+#include "SolutionFactory.h"
+#include "Solutions.h"
 
 // ------------------------------------------------------------------------------------------------
 int main(int argc, const char *argv[])
@@ -37,8 +18,7 @@ int main(int argc, const char *argv[])
 
     CSolutionFactory Factory;
 
-    Factory.DeclareSolution<MySolution>(2022, 1);
-    Factory.DeclareSolution<MySolution2>(2022, 2);
+    Factory.DeclareSolution<C2022Day1>(2022, 1, "Calorie Counting");
 
     Factory.ExecuteSolution(Year.Value(), Day.Value());
 
