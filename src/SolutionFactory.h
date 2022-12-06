@@ -35,6 +35,7 @@ public:
 template<class Base>
 class CSolutionClass : public Base
 {
+    YearDay m_MaxYearDay;
     std::string m_Name;
 
 public:
@@ -55,16 +56,20 @@ struct SolutionDesc
 class CSolutionFactory
 {
     std::map<YearDay, SolutionDesc> m_SolutionMap;
+    YearDay m_MaxYearDay = {};
 
 public:
     template<class SolutionClass>
     void DeclareSolution(int Year, int Day, const std::string &Name)
     {
-        auto [_, Success] = m_SolutionMap.emplace(YearDay{ Year, Day }, SolutionDesc{ Name, CSolutionClass<SolutionClass>::Create } );
+        YearDay yearDay{ Year, Day };
+        auto [_, Success] = m_SolutionMap.emplace(yearDay, SolutionDesc{ Name, CSolutionClass<SolutionClass>::Create } );
         if(!Success)
         {
             throw(std::runtime_error("Solution for given year/day pair has already been declared."));
         }
+
+        m_MaxYearDay = std::max(yearDay, m_MaxYearDay);
     }
 
     void ExecuteSolution(int Year, int Day) const
@@ -78,4 +83,6 @@ public:
         std::unique_ptr<CSolutionBase> pSolution = FnCreate();
         pSolution->Execute(solutionIt->second.Name);
     }
+
+    void MaxYearDay(int &Year, int &Day) { Year = m_MaxYearDay.Year; Day = m_MaxYearDay.Day; }
 };

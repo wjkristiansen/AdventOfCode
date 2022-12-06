@@ -21,3 +21,14 @@ public:
 
     void ReadData();
 };
+
+class C2022Day2 : public CSolutionBase
+{
+public:
+    virtual void Execute(const std::string& Name);
+
+    int DoRound(char Opponent, char Self );
+    int WinScore(char Self);
+    int LoseScore(char Self);
+    int DrawScore(char Self);
+};

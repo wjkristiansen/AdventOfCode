@@ -2,6 +2,7 @@ add_executable(
     advent
         main.cpp
         2022/Day1.cpp
+        2022/Day2.cpp
     )
 
 target_link_libraries(
@@ -23,6 +24,7 @@ install(
 install(
     FILES
         2022/Day1.txt
+        2022/Day2.txt
     DESTINATION ${CMAKE_SOURCE_DIR}/install/$<CONFIG>
     )
 
