@@ -41,3 +41,8 @@ class C2022Day3 : public CSolutionBase
 {
     virtual void Execute(const std::string& Name);
 };
+
+class C2022Day4 : public CSolutionBase
+{
+    virtual void Execute(const std::string& Name);
+};
