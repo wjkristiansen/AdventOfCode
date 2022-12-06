@@ -6,7 +6,7 @@ void C2022Day4::Execute(const std::string &Name)
 
     std::ifstream fstream("Day4.txt");
 
-    size_t FullyContainsCount = 0;
+    size_t OverlappingCount = 0;
 
     for(;!fstream.eof();)
     {
@@ -32,13 +32,10 @@ void C2022Day4::Execute(const std::string &Name)
 
         // std::cout << "[" << r0.first << "," << r0.second << "],[" << r1.first << "," << r1.second << "]" << std::endl;
 
-        // See if r0 contains r1
-        if(r1.first >= r0.first && r1.second <= r0.second)
-            FullyContainsCount++;
-        else
-        if(r0.first >= r1.first && r0.second <= r1.second)
-            FullyContainsCount++;
+        // See if r0 overlaps r1
+        if(r1.first <= r0.second && r0.first <= r1.second)
+            OverlappingCount++;
     }
 
-    std::cout << "Fully contains count: " << FullyContainsCount << std::endl;
+    std::cout << "Overlapping count: " << OverlappingCount << std::endl;
 }
