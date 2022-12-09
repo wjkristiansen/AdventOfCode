@@ -5,6 +5,7 @@ add_executable(
         2022/Day2.cpp
         2022/Day3.cpp
         2022/Day4.cpp
+        2022/Day5.cpp
     )
 
 target_link_libraries(
@@ -29,6 +30,7 @@ install(
         2022/Day2.txt
         2022/Day3.txt
         2022/Day4.txt
+        2022/Day5.txt
     DESTINATION ${CMAKE_SOURCE_DIR}/install/$<CONFIG>
     )
 
