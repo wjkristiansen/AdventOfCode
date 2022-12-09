@@ -40,7 +40,7 @@ void CSolution<2022, 5>::Execute()
 {
     std::ifstream fstream("Day5.txt"); 
 
-    std::vector<std::deque<char>> Stacks;
+    std::vector<std::vector<char>> Stacks;
     for (const char* crates : InitStacks)
     {
         Stacks.emplace_back();
@@ -71,12 +71,10 @@ void CSolution<2022, 5>::Execute()
         std::cout << count << ", " << source << ", " << dest << std::endl;
         source--;
         dest--;
-        for (size_t i = 0; i < count; ++i)
-        {
-            auto crate = Stacks[source].back();
-            Stacks[source].pop_back();
-            Stacks[dest].push_back(crate);
-        }
+        auto& SourceStack = Stacks[source];
+        auto& DestStack = Stacks[dest];
+        DestStack.insert(DestStack.end(), SourceStack.end() - count, SourceStack.end());
+        SourceStack.erase(SourceStack.end() - count, SourceStack.end());
     }
 
     for (auto& stack : Stacks)
