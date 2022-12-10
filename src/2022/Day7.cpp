@@ -4,7 +4,6 @@
 #include <sstream>
 #include <vector>
 #include <map>
-#include <exception>
 #include <assert.h>
 
 #include "..\SolutionFactory.h"

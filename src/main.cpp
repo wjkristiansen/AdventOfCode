@@ -14,6 +14,7 @@ int main(int argc, const char *argv[])
     Factory.DeclareSolution<2022, 5>("Supply Stacks");
     Factory.DeclareSolution<2022, 6>("Tuning Trouble");
     Factory.DeclareSolution<2022, 7>("No Space Left On Device");
+    Factory.DeclareSolution<2022, 8>("Treetop Tree House");
 
     int MaxYear;
     int MaxDay;
