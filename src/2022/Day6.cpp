@@ -9,14 +9,11 @@
 
 #include "..\SolutionFactory.h"
 
-bool AreFourUnique(const std::deque<char> &lastFour)
+bool AreAllUnique(const std::deque<char> &queue)
 {
     std::set<char> uniqueChars;
-    uniqueChars.insert(lastFour[0]);
-    uniqueChars.insert(lastFour[1]);
-    uniqueChars.insert(lastFour[2]);
-    uniqueChars.insert(lastFour[3]);
-    if(uniqueChars.size() == 4)
+    uniqueChars.insert(queue.begin(), queue.end());
+    if(uniqueChars.size() == queue.size())
         return true; // All four chars are unique
 
     return false;
@@ -25,30 +22,50 @@ bool AreFourUnique(const std::deque<char> &lastFour)
 void CSolution<2022, 6>::Execute()
 {
     std::ifstream fstream("Day6.txt");
-    std::deque<char> lastFour;
+    std::deque<char> queue;
 
     // Find the first location in the stream of 4 unique characters
     std::optional<size_t> start;
+    std::optional<size_t> messageStart;
     for(size_t pos = 0; !fstream.eof(); ++pos)
     {
         char c;
         fstream >> c;
-        lastFour.push_back(c);
+        queue.push_back(c);
 
-        if(pos >= 3)
+        if (!messageStart.has_value())
         {
-            if(AreFourUnique(lastFour))
+            if (queue.size() == 14)
             {
-                start = pos + 1;
-                break;
-            }
+                if (AreAllUnique(queue))
+                {
+                    messageStart = pos;
+                    break;
+                }
 
-            lastFour.pop_front();
+                queue.pop_front();
+            } 
+        }
+        else
+        {
+            if (!start.has_value())
+            {
+                if (queue.size() == 4)
+                {
+                    if (AreAllUnique(queue))
+                    {
+                        start = pos;
+                        break;
+                    }
+
+                    queue.pop_front();
+                }
+            }
         }
     }
 
-    if(start.has_value())
+    if(messageStart.has_value())
     {
-        std::cout << start.value() << std::endl;
+        std::cout << messageStart.value() + 1 << std::endl;
     }
 }
