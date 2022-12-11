@@ -14,6 +14,11 @@ struct Tree
     Tree(int height) : Height(height) {}
     int VisibleCount = 0;
     int Height = 0;
+    int VisibleDistLeft = 0;
+    int VisibleDistRight = 0;
+    int VisibleDistUp = 0;
+    int VisibleDistDown = 0;
+    int ScenicScore() const { return VisibleDistUp * VisibleDistDown * VisibleDistLeft * VisibleDistRight; }
 };
 
 void CSolution<2022, 8>::Execute()
@@ -39,69 +44,122 @@ void CSolution<2022, 8>::Execute()
     }
 
     // Scan rows...
-    for(auto &row : grid)
+    for (size_t row = 0; row < grid.size(); ++row)
     {
         // From left to right
         int max = -1;
-        for(auto it = row.begin(); it != row.end(); ++it)
+        for (int column = 0; column < grid[0].size(); ++column)
         {
-            if(it->Height > max)
+            auto &Tree = grid[row][column];
+            // Determine outside visibility
+            if ( Tree.Height > max)
             {
-                it->VisibleCount++;
-                max = it->Height;
+                Tree.VisibleCount++;
+                max = Tree.Height;
+            }
+
+            // Walk back to the left and to measure visual distance
+            for(int walkBack = column; walkBack > 0;)
+            {
+                --walkBack; 
+                Tree.VisibleDistLeft++;
+
+                if(Tree.Height <= grid[row][walkBack].Height)
+                {
+                    break;
+                }
             }
         }
 
         // From right to left
         max = -1;
-        for(auto it = row.rbegin(); it != row.rend(); ++it)
+        for (int column = int(grid[row].size()); column > 0;)
         {
-            if(it->Height > max)
+            --column;
+            auto &Tree = grid[row][column];
+
+            if (Tree.Height > max)
             {
-                it->VisibleCount++;
-                max = it->Height;
+                Tree.VisibleCount++;
+                max = Tree.Height;
+            }
+
+            for(int walkBack = column + 1; walkBack < grid[row].size(); ++walkBack)
+            {
+                Tree.VisibleDistRight++;
+                if(Tree.Height <= grid[row][walkBack].Height)
+                {
+                    break;
+                }
             }
         }
     }
 
     // Scan columns...
-    for(size_t column = 0; column < grid[0].size(); ++column)
+    for(int column = 0; column < grid[0].size(); ++column)
     {
         // From top to bottom
         int max = -1;
-        for(size_t row = 0; row < grid.size(); ++row)
+        for(int row = 0; row < grid.size(); ++row)
         {
-            if(grid[row][column].Height > max)
+            auto &Tree = grid[row][column];
+            if(Tree.Height > max)
             {
-                grid[row][column].VisibleCount++;
-                max = grid[row][column].Height;
+                Tree.VisibleCount++;
+                max = Tree.Height;
+            }
+
+            for(int walkBack = row; walkBack > 0;)
+            {
+                --walkBack; 
+                Tree.VisibleDistUp++;
+
+                if(Tree.Height <= grid[walkBack][column].Height)
+                {
+                    break;
+                }
             }
         }
 
         // From bottom to top
         max = -1;
-        for(size_t row = grid.size(); row > 0;)
+        for(int row = int(grid.size()); row > 0;)
         {
             --row;
+            auto &Tree = grid[row][column];
 
-            if(grid[row][column].Height > max)
+            if (Tree.Height > max)
             {
-                grid[row][column].VisibleCount++;
-                max = grid[row][column].Height;
+                Tree.VisibleCount++;
+                max = Tree.Height;
+            }
+
+            for(int walkBack = row + 1; walkBack < grid.size(); ++walkBack)
+            {
+                Tree.VisibleDistDown++;
+                if(Tree.Height <= grid[walkBack][column].Height)
+                {
+                    break;
+                }
             }
         }
     }
 
     // Now count the number of visible trees
     size_t NumVisible = 0;
+    int MaxScenicScore = 0;
     for(auto &row : grid)
     {
         for(auto &Tree : row)
         {
             if(Tree.VisibleCount > 0)
                 NumVisible++;
+
+            if (Tree.ScenicScore() > MaxScenicScore)
+                MaxScenicScore = Tree.ScenicScore();
         }
     }
 
     std::cout << "Num visible trees: " << NumVisible << std::endl;
+    std::cout << "Max scenic score: " << MaxScenicScore << std::endl;
 }
