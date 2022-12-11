@@ -1,14 +1,9 @@
+file(GLOB advent_src CONFIGURE_DEPENDS "2022/*.cpp")
+
 add_executable(
     advent
         main.cpp
-        2022/Day1.cpp
-        2022/Day2.cpp
-        2022/Day3.cpp
-        2022/Day4.cpp
-        2022/Day5.cpp
-        2022/Day6.cpp
-        2022/Day7.cpp
-        2022/Day8.cpp
+        ${advent_src}
     )
 
 target_link_libraries(
@@ -27,17 +22,11 @@ install(
     DESTINATION ${CMAKE_SOURCE_DIR}/install/$<CONFIG>
     )
 
+file(GLOB advent_txt CONFIGURE_DEPENDS "2022/*.txt")
+
 install(
     FILES
-        2022/Day1.txt
-        2022/Day2.txt
-        2022/Day3.txt
-        2022/Day4.txt
-        2022/Day5.txt
-        2022/Day6.txt
-        2022/Day6.txt
-        2022/Day7.txt
-        2022/Day8.txt
+        ${advent_txt}
     DESTINATION ${CMAKE_SOURCE_DIR}/install/$<CONFIG>
     )
 
