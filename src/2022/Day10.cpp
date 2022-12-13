@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 #include <assert.h>
 
 #include "..\SolutionFactory.h"
@@ -19,12 +20,17 @@ public:
     int m_operand = 0;
     int m_opTicksRemaining = 0;
     std::istream &m_input;
+    std::vector<char> &m_screenPixels;
+    int m_screenWidth;
 
-    CPU(std::istream &input) :
-        m_input(input) {}
+    CPU(std::istream &input, std::vector<char> &screenPixels, int screenWidth) :
+        m_input(input),
+        m_screenPixels(screenPixels),
+        m_screenWidth(screenWidth) {}
 
-    bool Cycle()
+    bool Cycle(int tick)
     {
+        // Executo op
         if(m_opTicksRemaining == 0)
         {
             // Finish addx
@@ -59,6 +65,13 @@ public:
 
         m_opTicksRemaining--;
 
+        // Draw pixel
+        if (tick < m_screenPixels.size())
+        {
+            int col = tick % m_screenWidth;
+            m_screenPixels[tick] = ((col >= m_x - 1) && (col <= m_x + 1)) ? '#' : '.';
+        }
+
         return true;
     }
 };
@@ -66,15 +79,18 @@ public:
 void CSolution<2022, 10>::Execute()
 {
     std::ifstream fstream("Day10.txt");
+    const int screenRows = 6;
+    const int screenColumns = 40;
+    std::vector<char> screen(screenRows * screenColumns);
 
-    CPU cpu(fstream);
+    CPU cpu(fstream, screen, screenColumns);
 
     int signalStrength = 0;
 
-    for(size_t ticks = 0; cpu.Cycle();)
+    for(int tick = 0; cpu.Cycle(tick);)
     {
-        ++ticks;
-        switch (ticks)
+        ++tick;
+        switch (tick)
         {
         case 20:
             signalStrength += 20 * cpu.m_x;
@@ -98,4 +114,16 @@ void CSolution<2022, 10>::Execute()
     }
 
     std::cout << "Signal strength: " << signalStrength << std::endl;
+
+    size_t pixel = 0;
+    for(int row = 0; row < screenRows; ++row)
+    {
+        for(int column = 0; column < screenColumns; ++column)
+        {
+            std::cout << screen[pixel];
+            ++pixel;
+        }
+
+        std::cout << std::endl;
+    }
 }
