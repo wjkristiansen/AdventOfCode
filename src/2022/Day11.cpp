@@ -16,62 +16,63 @@ enum class OpType
     Square,
 };
 
-template<OpType Type>
-struct Operation
-{
-};
+template<OpType Type, typename ValueType> struct Operation;
 
+template<typename ValueType>
 struct OperationBase
 {
     virtual ~OperationBase() = default;
-    virtual int Execute(int old) const = 0;
+    virtual ValueType Execute(const ValueType &old) const = 0;
 };
 
-template <>
-struct Operation<OpType::AddConstant> : public OperationBase
+template <typename ValueType>
+struct Operation<OpType::AddConstant, ValueType> : public OperationBase<ValueType>
 {
-    int Constant;
-    Operation(int c) : Constant(c) {}
-    virtual int Execute(int old) const final { return old + Constant; }
+    ValueType Constant;
+    Operation(ValueType c) : Constant(c) {}
+    virtual ValueType Execute(const ValueType &old) const final { return old + Constant; }
 };
 
-template <>
-struct Operation<OpType::MulConstant> : public OperationBase
+template <typename ValueType>
+struct Operation<OpType::MulConstant, ValueType> : public OperationBase<ValueType>
 {
-    int Constant;
-    Operation(int c) : Constant(c) {}
-    virtual int Execute(int old) const final { return old * Constant; }
+    ValueType Constant;
+    Operation(ValueType c) : Constant(c) {}
+    virtual ValueType Execute(const ValueType &old) const final { return old * Constant; }
 };
 
-template <>
-struct Operation<OpType::Double> : public OperationBase
+template <typename ValueType>
+struct Operation<OpType::Double, ValueType> : public OperationBase<ValueType>
 {
-    virtual int Execute(int old) const final { return old + old; }
+    virtual ValueType Execute(const ValueType &old) const final { return old + old; }
 };
 
-template <>
-struct Operation<OpType::Square> : public OperationBase
+template <typename ValueType>
+struct Operation<OpType::Square, ValueType> : public OperationBase<ValueType>
 {
-    virtual int Execute(int old) const final { return old * old; }
+    virtual ValueType Execute(const ValueType &old) const final { ValueType result = old * old; assert(old == result / old); return result; }
 };
+
+using ValueType = uint64_t;
 
 struct Monkey
 {
-    int TestDivisor = 1;
+    ValueType TestDivisor = 1U;
     int TrueMonkey = 0;
     int FalseMonkey = 0;
-    std::unique_ptr<OperationBase> pOperation;
-    std::deque<int> Items;
-    int InspectCount = 0;
+    std::unique_ptr<OperationBase<ValueType>>pOperation;
+    std::deque<ValueType> Items;
+    size_t InspectCount = 0;
 
-    void DoInspection(std::vector<Monkey> &Monkeys)
+    void DoInspection(std::vector<Monkey> &Monkeys, const ValueType &lcm)
     {
         for(auto Item : Items)
         {
             InspectCount++;
             Items.pop_front();
-            int newLevel = pOperation->Execute(Item);
-            newLevel /= 3;
+            ValueType newLevel = pOperation->Execute(Item);
+//            newLevel /= 3;
+            newLevel %= lcm;
             bool test = newLevel == TestDivisor * (newLevel / TestDivisor);
             if(test)
                 Monkeys[TrueMonkey].Items.push_back(newLevel);
@@ -85,6 +86,8 @@ void CSolution<2022, 11>::Execute()
 {
     std::ifstream fstream("Day11.txt");
     std::vector<Monkey> Monkeys;
+
+    ValueType lcm = 1;
 
     for(;!fstream.eof();)
     {
@@ -102,7 +105,7 @@ void CSolution<2022, 11>::Execute()
         {
             int value;
             fstream >> value;
-            monkey.Items.push_back(value);
+            monkey.Items.push_back(ValueType(value));
             char c;
             fstream >> c;
             if (c != ',')
@@ -123,11 +126,11 @@ void CSolution<2022, 11>::Execute()
         {
             if (opString == "+")
             {
-                monkey.pOperation = std::make_unique<Operation<OpType::Double>>();
+                monkey.pOperation = std::make_unique<Operation<OpType::Double, ValueType>>();
             }
             else
             {
-                monkey.pOperation = std::make_unique<Operation<OpType::Square>>();
+                monkey.pOperation = std::make_unique<Operation<OpType::Square, ValueType>>();
             }
         }
         else
@@ -136,19 +139,20 @@ void CSolution<2022, 11>::Execute()
 
             if (opString == "+")
             {
-                monkey.pOperation = std::make_unique<Operation<OpType::AddConstant>>(constant);
+                monkey.pOperation = std::make_unique<Operation<OpType::AddConstant, ValueType>>(constant);
             }
             else
             {
-                monkey.pOperation = std::make_unique<Operation<OpType::MulConstant>>(constant);
+                monkey.pOperation = std::make_unique<Operation<OpType::MulConstant, ValueType>>(constant);
             }
         }
 
-        int divisor;
+        ValueType divisor;
         fstream >> token; // "Test:"
         fstream >> token; // "divisible"
         fstream >> token; // "by"
         fstream >> divisor;
+        lcm *= divisor;
 
         monkey.TestDivisor = divisor;
 
@@ -173,16 +177,16 @@ void CSolution<2022, 11>::Execute()
         std::getline(fstream, line); // Blank line
     }
 
-    for (int round = 0; round < 20; ++round)
+    for (int round = 0; round < 10000 ; ++round)
     {
         for (auto& monkey : Monkeys)
         {
-            monkey.DoInspection(Monkeys);
+            monkey.DoInspection(Monkeys, lcm);
         }
     }
 
-    int Max = 0;
-    int Max2 = 0;
+    size_t Max = 0;
+    size_t Max2 = 0;
     for (int i = 0; i < Monkeys.size(); ++i)
     {
         std::cout << "Monkey " << i << " inspected items " << Monkeys[i].InspectCount << " times." << std::endl;
@@ -199,7 +203,7 @@ void CSolution<2022, 11>::Execute()
 
     std::cout << "Top two: " << Max << " and " << Max2 << std::endl;
 
-    int MonkeyBusiness = Max * Max2;
+    size_t MonkeyBusiness = Max * Max2;
 
     std::cout << "Monkey Business: " << MonkeyBusiness << std::endl;
 }
