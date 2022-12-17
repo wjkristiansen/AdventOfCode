@@ -3,12 +3,10 @@
 #include <vector>
 #include <queue>
 
-template<class NodeType>
 class Dijkstras
 {
     static const auto MaxCost = std::numeric_limits<size_t>::max();
 
-    std::vector<NodeType> &m_Nodes;
     std::vector<bool> m_Visited;
     std::vector<size_t> m_Costs;
 
@@ -31,18 +29,26 @@ class Dijkstras
     };
 
 public:
-    Dijkstras(const std::vector<NodeType> &Nodes) :
-        m_Nodes(Nodes),
-        m_Visited(Nodes.size()),
-        m_Costs(Nodes.size()) {}
+    Dijkstras(size_t NumNodes) :
+        m_Visited(NumNodes),
+        m_Costs(NumNodes) {}
 
-    size_t Execute(size_t startIndex, size_t endIndex)
+    // Templatized Execute function requires that `NodeType` implement the following:
+    // size_t NumNeighbors()
+    // size_t NeighborIndex(size_t i) // Where `i` is in the range `[0, NumNeighbors())`
+    //
+    // In addition, the functor EdgeCostFunc must implement:
+    // operator()(const NodeType &node, const NodeType &neighbor)
+    // Where `neighbor` is one of the neighbors of `node`.
+    template<class NodeType, class EdgeCostFunc>
+    size_t Execute(const std::vector<NodeType> &Nodes, size_t startIndex, size_t endIndex)
     {
-        // Add the start node cost to the priority queue
+        // Initialize data
         std::fill(m_Visited.begin(), m_Visited.end(), false);
-        std::fill(m_Costs.begin(), m_Visited.end(), MaxCost);
+        std::fill(m_Costs.begin(), m_Costs.end(), MaxCost);
         m_Costs[startIndex] = 0;
 
+        // Add the start node cost to the priority queue
         std::priority_queue<Edge, std::vector<Edge>, Edge::Greater> EdgeQueue;
         EdgeQueue.emplace(0, startIndex);
 
@@ -60,12 +66,13 @@ public:
             {
                 return m_Costs[Index];
             }
-            const NodeType& node = m_Nodes[Index];
+            const NodeType& node = Nodes[Index];
 
             for (int i = 0; i < node.NumNeighbors(); ++i)
             {
                 size_t NeighborIndex = node.NeighborIndex(i);
-                size_t NewCost = m_Costs[Index] + node.Cost(NeighborIndex);
+                EdgeCostFunc EdgeCost;
+                size_t NewCost = m_Costs[Index] + EdgeCost(node, Nodes[NeighborIndex]);
                 if (NewCost < m_Costs[NeighborIndex])
                 {
                     m_Costs[NeighborIndex] = NewCost;
