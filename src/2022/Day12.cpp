@@ -29,6 +29,7 @@ void CSolution<2022, 12>::Execute()
     std::ifstream fstream("Day12.txt");
 
     std::vector<HeightMapNode> HeightMapNodes;
+    std::vector<size_t> PotentialStartPoints;
     size_t StartIndex = 0;
     size_t EndIndex = 0;
 
@@ -51,6 +52,11 @@ void CSolution<2022, 12>::Execute()
             {
                 EndIndex = HeightMapNodes.size();
                 c = 'z';
+            }
+
+            if(c == 'a')
+            {
+                PotentialStartPoints.push_back(HeightMapNodes.size());
             }
             HeightMapNodes.emplace_back(c);
         }
@@ -100,4 +106,14 @@ void CSolution<2022, 12>::Execute()
     size_t steps = dijkstras.Execute<HeightMapNode, CostFunc>(HeightMapNodes, StartIndex, EndIndex);
 
     std::cout << "Steps: " << steps << std::endl;
+
+    size_t MinSteps = std::numeric_limits<size_t>::max();
+    for(auto Start : PotentialStartPoints)
+    {
+        steps = dijkstras.Execute<HeightMapNode, CostFunc>(HeightMapNodes, Start, EndIndex);
+        if(steps < MinSteps)
+            MinSteps = steps;
+    }
+
+    std::cout << "Least Steps: " << MinSteps << std::endl;
 };
