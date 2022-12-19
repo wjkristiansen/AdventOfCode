@@ -1,13 +1,4 @@
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <vector>
-#include <memory>
-#include <optional>
-#include <string>
-#include <set>
-#include <assert.h>
-
+#include "../pch.h"
 #include "../SolutionFactory.h"
 
 enum class NodeType

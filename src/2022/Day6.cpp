@@ -1,13 +1,5 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <sstream>
-#include <vector>
-#include <deque>
-#include <set>
-#include <optional>
-
-#include "..\SolutionFactory.h"
+#include "../pch.h"
+#include "../SolutionFactory.h"
 
 bool AreAllUnique(const std::deque<char> &queue)
 {

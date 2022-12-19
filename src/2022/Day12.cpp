@@ -1,9 +1,7 @@
-#include <fstream>
-#include <string>
-#include <vector>
-#include <Dijkstras.h>
-
+#include "../pch.h"
 #include "../SolutionFactory.h"
+
+#include <Dijkstras.h>
 
 struct HeightMapNode
 {

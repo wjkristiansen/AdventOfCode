@@ -1,12 +1,5 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <sstream>
-#include <vector>
-#include <unordered_set>
-#include <assert.h>
-
-#include "..\SolutionFactory.h"
+#include "../pch.h"
+#include "../SolutionFactory.h"
 
 template<>
 struct std::hash<std::pair<int, int>>

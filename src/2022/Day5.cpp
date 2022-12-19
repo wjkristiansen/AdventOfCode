@@ -1,13 +1,7 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <sstream>
-#include <vector>
-#include <deque>
+#include "../pch.h"
+#include "../SolutionFactory.h"
 
-#include "..\SolutionFactory.h"
-
-const char *TestInitStacks[] = 
+const char *TestInitStacks[] =
 {
     "ZN",
     "MCD",

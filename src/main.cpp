@@ -1,6 +1,4 @@
-#include <InCommand.h>
-#include <iostream>
-
+#include "pch.h"
 #include "SolutionFactory.h"
 
 // ------------------------------------------------------------------------------------------------

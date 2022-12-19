@@ -39,3 +39,7 @@ if(WIN32)
         PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/install/$<CONFIG>"
     )
 endif()
+
+target_precompile_headers(advent
+    PRIVATE
+        "pch.h")

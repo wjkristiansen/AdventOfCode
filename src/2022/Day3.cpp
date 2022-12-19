@@ -1,9 +1,5 @@
-#include <fstream>
-#include <string>
-#include <iostream>
-#include <vector>
-
-#include "..\SolutionFactory.h"
+#include "../pch.h"
+#include "../SolutionFactory.h"
 
 static constexpr size_t Priority(char c)
 {

@@ -1,8 +1,5 @@
-#include <fstream>
-#include <iostream>
-#include <string>
-
-#include "..\SolutionFactory.h"
+#include "../pch.h"
+#include "../SolutionFactory.h"
 
 enum class Shape {Rock, Paper, Scissors};
 enum class Result {Win, Lose, Draw};

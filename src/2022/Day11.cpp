@@ -1,12 +1,5 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <deque>
-#include <vector>
-#include <memory>
-#include <assert.h>
-
-#include "..\SolutionFactory.h"
+#include "../pch.h"
+#include "../SolutionFactory.h"
 
 enum class OpType
 {

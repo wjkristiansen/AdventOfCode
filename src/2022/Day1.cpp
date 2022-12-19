@@ -1,8 +1,5 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-
-#include "..\SolutionFactory.h"
+#include "../pch.h"
+#include "../SolutionFactory.h"
 
 void CSolution<2022, 1>::Execute()
 {

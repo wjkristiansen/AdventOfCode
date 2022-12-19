@@ -1,12 +1,5 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <sstream>
-#include <vector>
-#include <assert.h>
-
-#include "..\SolutionFactory.h"
-
+#include "../pch.h"
+#include "../SolutionFactory.h"
 
 struct Tree
 {

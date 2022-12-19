@@ -1,10 +1,5 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
-#include <assert.h>
-
-#include "..\SolutionFactory.h"
+#include "../pch.h"
+#include "../SolutionFactory.h"
 
 enum class Op
 {
