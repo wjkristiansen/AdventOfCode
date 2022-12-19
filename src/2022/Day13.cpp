@@ -5,6 +5,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <set>
 #include <assert.h>
 
 #include "../SolutionFactory.h"
@@ -32,8 +33,6 @@ struct ListNode : public NodeBase
     virtual std::string ToString() const
     {
         std::ostringstream ss;
-        ss << "[";
-
         for (auto it = ChildNodes.begin(); it != ChildNodes.end();)
         {
             ss << it->get()->ToString();
@@ -42,13 +41,19 @@ struct ListNode : public NodeBase
                 ss << ",";
         }
 
-        ss << "]";
-
         return ss.str();
     }
 
     int Compare(const struct IntNode& o) const;
     int Compare(const struct ListNode& o) const;
+};
+
+struct InnerListNode : public ListNode
+{
+    virtual std::string ToString() const
+    {
+        return std::string("[") + ListNode::ToString() + std::string("]");
+    }
 };
 
 struct IntNode : public NodeBase
@@ -91,7 +96,7 @@ int IntNode::Compare(const ListNode& o) const
 
 int IntNode::Compare(const NodeBase& o) const
 {
-    std::cout << "Compare " << ToString() << " vs " << o.ToString() << std::endl;
+    //std::cout << "Compare " << ToString() << " vs " << o.ToString() << std::endl;
 
     switch (o.Type())
     {
@@ -137,7 +142,7 @@ int ListNode::Compare(const ListNode& o) const
 
 int ListNode::Compare(const NodeBase& o) const
 {
-    std::cout << "Compare " << ToString() << " vs " << o.ToString() << std::endl;
+    //std::cout << "Compare " << ToString() << " vs " << o.ToString() << std::endl;
 
     switch (o.Type())
     {
@@ -163,7 +168,7 @@ void ReadNode(std::istream &stream, ListNode *pParent)
         switch(c)
         {
         case '[': {
-            ListNode * pChild = new ListNode();
+            ListNode * pChild = new InnerListNode();
             ReadNode(stream, pChild);
             pParent->ChildNodes.emplace_back(pChild);
             break; }
@@ -195,11 +200,83 @@ void ReadNode(std::istream &stream, ListNode *pParent)
     }
 }
 
+struct Packet
+{
+    std::unique_ptr<NodeBase> Data;
+
+    Packet() = delete;
+    Packet(const Packet &) = delete;
+    Packet(Packet &&o) :
+        Data(std::move(o.Data))
+    {
+    }
+
+    Packet(const std::string &s)
+    {
+        std::istringstream ss(s);
+        auto pNode = new ListNode();
+        ReadNode(ss, pNode);
+        Data = std::unique_ptr<NodeBase>(pNode);
+    }
+
+    bool operator<(const Packet &o) const
+    {
+        return Data->Compare(*o.Data) < 0;
+    }
+
+    std::string ToString() const { return Data->ToString(); }
+};
+
 void CSolution<2022, 13>::Execute()
 {
+    std::set<Packet> Packets;
+    std::ifstream fstream("Day13.txt"); 
+
+    for(;!fstream.eof();)
+    {
+        std::string line;
+        std::getline(fstream, line);
+
+        if(!line.empty())
+        {
+            Packets.emplace(line);
+        }
+    }
+
+    // Now add the "divider packets"
+    const std::string DividerPacketStrings[] =
+    {
+        "[[2]]",
+        "[[6]]"
+    };
+    Packets.emplace(DividerPacketStrings[0]);
+    Packets.emplace(DividerPacketStrings[1]);
+
+    size_t DividerPacketIndices[2];
+
+    // Dump the ordered packets
+    size_t Index = 1;
+    for(auto &Packet : Packets)
+    {
+        std::string s = Packet.ToString();
+
+        if (s == DividerPacketStrings[0])
+            DividerPacketIndices[0] = Index;
+
+        if (s == DividerPacketStrings[1])
+            DividerPacketIndices[1] = Index;
+
+        ++Index;
+
+        std::cout << Packet.ToString() << std::endl;
+    }
+
+    std::cout << "Divider key: " << DividerPacketIndices[0] * DividerPacketIndices[1] << std::endl;
+
+#if 0
     size_t SumOfRightOrder = 0;
     size_t PairIndex = 1;
-    std::ifstream fstream("Day13.txt");
+    std::ifstream fstream("Day13.txt"); 
     for(;!fstream.eof();)
     {
         ListNode first;
@@ -233,4 +310,5 @@ void CSolution<2022, 13>::Execute()
     }
 
     std::cout << "Sum of right order: " << SumOfRightOrder << std::endl;
+#endif
 }
