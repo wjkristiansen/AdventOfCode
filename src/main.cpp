@@ -19,6 +19,7 @@ int main(int argc, const char *argv[])
     Factory.DeclareSolution<2022, 12>("Hill Climbing Algorithm");
     Factory.DeclareSolution<2022, 13>("Distress Signal");
     Factory.DeclareSolution<2022, 14>("Regolith Reservoir");
+    Factory.DeclareSolution<2022, 15>("Beacon Exclusion Zone");
 
     int MaxYear;
     int MaxDay;
@@ -31,8 +32,7 @@ int main(int argc, const char *argv[])
     InCommand::InCommandBool ShowHelp;
     CommandReader.DefaultCommandCtx()->DeclareVariableOption(Year, "year", "Advent of Code Year", 'y');
     CommandReader.DefaultCommandCtx()->DeclareVariableOption(Day, "day", "Advent of Code Day", 'd');
-    const InCommand::InCommandInt Parts[] = { 1, 2 };
-    CommandReader.DefaultCommandCtx()->DeclareVariableOption(Part, "part", 2, Parts, "Indicates which part of a day's challenge to run", 'p');
+    CommandReader.DefaultCommandCtx()->DeclareVariableOption(Part, "part", InCommand::CInCommandVariableDomain(1, 2), "Indicates which part of a day's challenge to run", 'p');
     CommandReader.DefaultCommandCtx()->DeclareSwitchOption(ShowHelp, "help", "Get help", 'h');
     CommandReader.ReadOptions();
 
