@@ -27,9 +27,12 @@ int main(int argc, const char *argv[])
     InCommand::CCommandReader CommandReader("advent", "Advent of Code", argc, argv);
     InCommand::InCommandInt Year(MaxYear);
     InCommand::InCommandInt Day(MaxDay);
+    InCommand::InCommandInt Part(2);
     InCommand::InCommandBool ShowHelp;
     CommandReader.DefaultCommandCtx()->DeclareVariableOption(Year, "year", "Advent of Code Year", 'y');
-    CommandReader.DefaultCommandCtx()->DeclareVariableOption(Day, "day", "Advent of Code Day", 'y');
+    CommandReader.DefaultCommandCtx()->DeclareVariableOption(Day, "day", "Advent of Code Day", 'd');
+    const InCommand::InCommandInt Parts[] = { 1, 2 };
+    CommandReader.DefaultCommandCtx()->DeclareVariableOption(Part, "part", 2, Parts, "Indicates which part of a day's challenge to run", 'p');
     CommandReader.DefaultCommandCtx()->DeclareSwitchOption(ShowHelp, "help", "Get help", 'h');
     CommandReader.ReadOptions();
 
