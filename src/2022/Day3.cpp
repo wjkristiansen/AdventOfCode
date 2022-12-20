@@ -12,7 +12,7 @@ static constexpr size_t Priority(char c)
     return 0;
 }
 
-void CSolution<2022, 3>::Execute()
+void CSolution<2022, 3>::Execute(int)
 {
     std::ifstream fstream("Day3.txt");
 

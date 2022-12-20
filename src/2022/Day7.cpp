@@ -123,7 +123,7 @@ public:
     std::map<std::string, std::unique_ptr<Node>> m_ChildNodes;
 };
 
-void CSolution<2022, 7>::Execute()
+void CSolution<2022, 7>::Execute(int)
 {
     DirectoryNode root("/", nullptr);
     std::ifstream fstream("Day7.txt");

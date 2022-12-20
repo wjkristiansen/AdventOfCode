@@ -36,7 +36,7 @@ int main(int argc, const char *argv[])
     CommandReader.DefaultCommandCtx()->DeclareSwitchOption(ShowHelp, "help", "Get help", 'h');
     CommandReader.ReadOptions();
 
-    Factory.ExecuteSolution(Year.Value(), Day.Value());
+    Factory.ExecuteSolution(Year.Value(), Day.Value(), Part.Value());
 
     return 0;
 }

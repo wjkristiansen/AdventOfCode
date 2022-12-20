@@ -11,7 +11,7 @@ bool AreAllUnique(const std::deque<char> &queue)
     return false;
 }
 
-void CSolution<2022, 6>::Execute()
+void CSolution<2022, 6>::Execute(int)
 {
     std::ifstream fstream("Day6.txt");
     std::deque<char> queue;

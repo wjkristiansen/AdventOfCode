@@ -22,7 +22,7 @@ struct CostFunc
     }
 };
 
-void CSolution<2022, 12>::Execute()
+void CSolution<2022, 12>::Execute(int)
 {
     std::ifstream fstream("Day12.txt");
 

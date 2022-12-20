@@ -14,7 +14,7 @@ struct Tree
     int ScenicScore() const { return VisibleDistUp * VisibleDistDown * VisibleDistLeft * VisibleDistRight; }
 };
 
-void CSolution<2022, 8>::Execute()
+void CSolution<2022, 8>::Execute(int)
 {
     std::ifstream fstream("Day8.txt");
     std::vector<std::vector<Tree>> grid;

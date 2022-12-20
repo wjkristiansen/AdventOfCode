@@ -1,7 +1,7 @@
 #include "../pch.h"
 #include "../SolutionFactory.h"
 
-void CSolution<2022, 1>::Execute()
+void CSolution<2022, 1>::Execute(int)
 {
     std::ifstream fstream("Day1.txt");
     std::string line;

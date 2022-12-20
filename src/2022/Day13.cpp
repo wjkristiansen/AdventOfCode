@@ -218,7 +218,7 @@ struct Packet
     std::string ToString() const { return Data->ToString(); }
 };
 
-void CSolution<2022, 13>::Execute()
+void CSolution<2022, 13>::Execute(int)
 {
     std::set<Packet> Packets;
     std::ifstream fstream("Day13.txt"); 

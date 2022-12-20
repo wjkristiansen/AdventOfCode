@@ -135,7 +135,7 @@ struct SandMap
     }
 };
 
-void CSolution<2022, 14>::Execute()
+void CSolution<2022, 14>::Execute(int)
 {
     int MinX = std::numeric_limits<int>::max();
     int MaxX = 0;

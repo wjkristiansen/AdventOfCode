@@ -71,7 +71,7 @@ public:
     }
 };
 
-void CSolution<2022, 10>::Execute()
+void CSolution<2022, 10>::Execute(int)
 {
     std::ifstream fstream("Day10.txt");
     const int screenRows = 6;

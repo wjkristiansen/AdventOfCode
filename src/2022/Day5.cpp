@@ -30,7 +30,7 @@ const char *InitStacks[] =
     "PDBCN"
 };
 
-void CSolution<2022, 5>::Execute()
+void CSolution<2022, 5>::Execute(int)
 {
     std::ifstream fstream("Day5.txt"); 
 

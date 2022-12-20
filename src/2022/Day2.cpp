@@ -140,7 +140,7 @@ static int DoRound2(char Opponent, char Outcome)
     return Score;
 }
 
-void CSolution<2022, 2>::Execute()
+void CSolution<2022, 2>::Execute(int)
 {
     std::ifstream fstream("Day2.txt");
 

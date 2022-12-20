@@ -28,14 +28,14 @@ template<int Year, int Day>
 class CSolution
 {
 public:
-    static void Execute();
+    static void Execute(int Part);
 };
 
 // ------------------------------------------------------------------------------------------------
 struct SolutionDesc
 {
     std::string Name;
-    void (*FnExecute)();
+    void (*FnExecute)(int Part);
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ public:
         m_MaxDate = std::max(Date{ Year, Day }, m_MaxDate);
     }
 
-    void ExecuteSolution(int Year, int Day) const
+    void ExecuteSolution(int Year, int Day, int Part) const
     {
         auto solutionIt = m_SolutionMap.find(Date{Year, Day});
         if(solutionIt == m_SolutionMap.end())
@@ -67,7 +67,7 @@ public:
 
         // Execute the solution
         auto FnExecute = solutionIt->second.FnExecute;
-        FnExecute();
+        FnExecute(Part);
     }
 
     void MaxDate(int &Year, int &Day) { Year = m_MaxDate.Year; Day = m_MaxDate.Day; }
