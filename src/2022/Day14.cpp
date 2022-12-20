@@ -65,6 +65,12 @@ struct SandMap
 
     char GetValue(const Point &p) const
     {
+        if (p.Y == Height - 1)
+            return '#';
+
+        if (p.X < MinX || p.X >= MinX + Width)
+            return '.';
+
         int x = p.X - MinX;
         size_t Index = p.Y * Width + (x % Width);
         return FlatMap[Index];
@@ -154,8 +160,9 @@ void CSolution<2022, 14>::Execute()
             MaxY = p.MaxY;
     }
 
-    MinX--;
-    MaxX++;
+    MaxY += 2;
+    MinX -= MaxY;
+    MaxX += MaxY;
 
     SandMap Map(MinX, MaxX, MaxY);
 
@@ -165,8 +172,6 @@ void CSolution<2022, 14>::Execute()
     }
 
     const Point SandStart(500, 0);
-
-    Map.SetValue(SandStart, '+');
 
     Map.Print();
 
@@ -207,12 +212,12 @@ void CSolution<2022, 14>::Execute()
     {
         Point Sand(SandStart);
         for (; SimTick(Sand);) {}
-        if (Sand.Y >= Map.Height)
-            break;
         ++Units;
+        if (Sand.Y == 0)
+            break;
     }
 
-    std::cout << "Number of sand units: " << Units << std::endl;
-
     Map.Print();
+
+    std::cout << "Number of sand units: " << Units << std::endl;
 }
