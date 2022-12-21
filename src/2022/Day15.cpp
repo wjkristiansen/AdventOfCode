@@ -101,7 +101,7 @@ struct BeaconMap
     }
 };
 
-void CSolution<2022, 15>::Execute(int)
+void CSolution<2022, 15>::Execute(int Part)
 {
     BeaconMap Map;
     std::ifstream fstream("Day15.txt"); 
@@ -118,16 +118,13 @@ void CSolution<2022, 15>::Execute(int)
     std::cout << "X Range: " << Map.XMin << ", " << Map.XMax << std::endl;
     std::cout << "Y Range: " << Map.YMin << ", " << Map.YMax << std::endl;
 
-    const int TestRow = 2000000;
-
-    auto MaybeBeacon = [&Map](const Point& p) -> bool
+    auto IsBeacon = [&Map](const Point& p) -> bool
     {
-        if (Map.Beacons.find(p) != Map.Beacons.end())
-        {
-            // Already a beacon at p
-            return true;
-        }
+        return Map.Beacons.find(p) != Map.Beacons.end();
+    };
 
+    auto NextMaybeBeaconX = [&Map](const Point& p) -> int
+    {
         // For each sensor, see if there are any closer to `p` than
         // to its locked beacon
         for (auto &s : Map.Sensors)
@@ -137,25 +134,62 @@ void CSolution<2022, 15>::Execute(int)
             {
                 // Sensor is already locked onto a beacon a the same distance or less.
                 // Must not be a beacon at point `p`
-                return false;
+                int vdist = abs(p.Y - s.Loc.Y);
+                int hdist = s.DistToBeacon - vdist;
+                return 1 + s.Loc.X + hdist;
             }
         }
 
-        // Maybe a beacon.
+        // May a beacon.
         // All sensors are locked onto a beacon less distant than `p`
-        return true;
+        return 0;
     };
 
-    int NotBeaconCount = 0;
-
-    for (int X = Map.XMin - Map.MaxDist; X <= Map.XMax + Map.MaxDist; ++X)
+    if (Part == 1)
     {
-        Point p(X, TestRow);
-        if (!MaybeBeacon(p))
+        int NotBeaconCount = 0;
+
+        const int TestRow = 2000000;
+
+        for (int X = Map.XMin - Map.MaxDist; X <= Map.XMax + Map.MaxDist; ++X)
         {
-            NotBeaconCount++;
+            Point p(X, TestRow);
+            if (!IsBeacon(p) && (NextMaybeBeaconX(p) > 0))
+            {
+                NotBeaconCount++;
+            }
+        }
+
+        std::cout << "Number of known-non-beacon positions in row " << TestRow << ": " << NotBeaconCount << std::endl;
+    }
+    else
+    {
+        int64_t TuningFreq = 0;
+        int SearchMinX = 0;
+        int SearchMinY = 0;
+        int SearchMaxX = 4000000;
+        int SearchMaxY = 4000000;
+
+        for (int y = SearchMinY; y <= SearchMaxY; ++y)
+        {
+            for (int x = SearchMinX; x <= SearchMaxX; )
+            {
+                Point p(x, y);
+                int nextX = x + 1;
+                if (!IsBeacon(p))
+                {
+                    nextX = NextMaybeBeaconX(p);
+
+                    if (nextX == 0)
+                    {
+                        TuningFreq = int64_t(p.X) * 4000000 + p.Y;
+                        std::cout << "Beacon location: x=" << p.X << ", y=" << p.Y << std::endl;
+                        std::cout << "Beacon tuning frequency: " << TuningFreq << std::endl;
+                        return;
+                    }
+                }
+                x = nextX;
+            }
         }
     }
-
-    std::cout << "Number of known-non-beacon positions in row " << TestRow << ": " << NotBeaconCount << std::endl;
 }
