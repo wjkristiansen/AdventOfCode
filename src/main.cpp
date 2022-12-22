@@ -20,6 +20,7 @@ int main(int argc, const char *argv[])
     Factory.DeclareSolution<2022, 13>("Distress Signal");
     Factory.DeclareSolution<2022, 14>("Regolith Reservoir");
     Factory.DeclareSolution<2022, 15>("Beacon Exclusion Zone");
+    Factory.DeclareSolution<2022, 16>("Proboscidea Volcanium");
 
     int MaxYear;
     int MaxDay;
