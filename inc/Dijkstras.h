@@ -47,7 +47,7 @@ public:
         std::fill(m_Visited.begin(), m_Visited.end(), false);
         std::fill(m_Costs.begin(), m_Costs.end(), MaxCost);
         m_Costs[startIndex] = 0;
-
+ 
         // Add the start node cost to the priority queue
         std::priority_queue<Edge, std::vector<Edge>, Edge::Greater> EdgeQueue;
         EdgeQueue.emplace(0, startIndex);

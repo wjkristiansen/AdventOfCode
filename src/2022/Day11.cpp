@@ -1,5 +1,5 @@
-#include "../pch.h"
-#include "../SolutionFactory.h"
+#include "pch.h"
+#include "SolutionFactory.h"
 
 enum class OpType
 {
@@ -75,7 +75,7 @@ struct Monkey
     }
 };
 
-void CSolution<2022, 11>::Execute(int)
+void CSolution<11>::Execute(int)
 {
     std::ifstream fstream("Day11.txt");
     std::vector<Monkey> Monkeys;

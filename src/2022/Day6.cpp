@@ -1,5 +1,5 @@
-#include "../pch.h"
-#include "../SolutionFactory.h"
+#include "pch.h"
+#include "SolutionFactory.h"
 
 bool AreAllUnique(const std::deque<char> &queue)
 {
@@ -11,7 +11,7 @@ bool AreAllUnique(const std::deque<char> &queue)
     return false;
 }
 
-void CSolution<2022, 6>::Execute(int)
+void CSolution<6>::Execute(int)
 {
     std::ifstream fstream("Day6.txt");
     std::deque<char> queue;

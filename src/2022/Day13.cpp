@@ -1,5 +1,5 @@
-#include "../pch.h"
-#include "../SolutionFactory.h"
+#include "pch.h"
+#include "SolutionFactory.h"
 
 enum class NodeType
 {
@@ -218,7 +218,7 @@ struct Packet
     std::string ToString() const { return Data->ToString(); }
 };
 
-void CSolution<2022, 13>::Execute(int)
+void CSolution<13>::Execute(int)
 {
     std::set<Packet> Packets;
     std::ifstream fstream("Day13.txt"); 

@@ -1,5 +1,5 @@
-#include "../pch.h"
-#include "../SolutionFactory.h"
+#include "pch.h"
+#include "SolutionFactory.h"
 
 enum class Shape {Rock, Paper, Scissors};
 enum class Result {Win, Lose, Draw};
@@ -140,7 +140,7 @@ static int DoRound2(char Opponent, char Outcome)
     return Score;
 }
 
-void CSolution<2022, 2>::Execute(int)
+void CSolution<2>::Execute(int)
 {
     std::ifstream fstream("Day2.txt");
 

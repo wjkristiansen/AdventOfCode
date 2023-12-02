@@ -6,25 +6,7 @@
 #pragma once
 
 // ------------------------------------------------------------------------------------------------
-struct Date
-{
-    int Year;
-    int Day;
-
-    bool operator<(const Date &o) const
-    {
-        if(Year < o.Year)
-            return true;
-        
-        if(o.Year < Year)
-            return false;
-
-        return Day < o.Day;
-    }
-};
-
-// ------------------------------------------------------------------------------------------------
-template<int Year, int Day>
+template<int Day>
 class CSolution
 {
 public:
@@ -41,34 +23,40 @@ struct SolutionDesc
 // ------------------------------------------------------------------------------------------------
 class CSolutionFactory
 {
-    std::map<Date, SolutionDesc> m_SolutionMap;
-    Date m_MaxDate = {};
+    int m_MaxDay;
+    std::map<int, SolutionDesc> m_SolutionMap;
 
 public:
-    template<int Year, int Day>
+    template<int Day>
     void DeclareSolution(const std::string &Name)
     {
-        auto [_, Success] = m_SolutionMap.emplace(Date{Year, Day}, SolutionDesc{Name, CSolution<Year, Day>::Execute});
+        auto [_, Success] = m_SolutionMap.emplace(Day, SolutionDesc{Name, CSolution<Day>::Execute});
         if(!Success)
         {
             throw(std::runtime_error("Solution for given year/day pair has already been declared."));
         }
 
-        m_MaxDate = std::max(Date{ Year, Day }, m_MaxDate);
+        m_MaxDay = std::max(Day, m_MaxDay);
     }
 
-    void ExecuteSolution(int Year, int Day, int Part) const
+    void ExecuteSolution(int Day, int Part) const
     {
-        auto solutionIt = m_SolutionMap.find(Date{Year, Day});
+        if(Day == 0)
+        {
+            // Default to max declared day
+            Day = m_MaxDay;
+        }
+
+        auto solutionIt = m_SolutionMap.find(Day);
         if(solutionIt == m_SolutionMap.end())
             throw(std::runtime_error("No solution declared for year/day pair."));
 
-        std::cout << "Advent of Code " << Year << " Day " << Day << ": " << solutionIt->second.Name << std::endl;
+        std::cout << "Day " << Day << ", Part " << Part << ": " << solutionIt->second.Name << std::endl;
 
         // Execute the solution
         auto FnExecute = solutionIt->second.FnExecute;
         FnExecute(Part);
     }
 
-    void MaxDate(int &Year, int &Day) { Year = m_MaxDate.Year; Day = m_MaxDate.Day; }
+    int MaxDay() const { return m_MaxDay;}
 };

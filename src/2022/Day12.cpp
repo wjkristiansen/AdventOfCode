@@ -1,5 +1,5 @@
-#include "../pch.h"
-#include "../SolutionFactory.h"
+#include "pch.h"
+#include "SolutionFactory.h"
 
 #include <Dijkstras.h>
 
@@ -22,7 +22,7 @@ struct CostFunc
     }
 };
 
-void CSolution<2022, 12>::Execute(int)
+void CSolution<12>::Execute(int)
 {
     std::ifstream fstream("Day12.txt");
 

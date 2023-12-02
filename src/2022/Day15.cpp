@@ -1,6 +1,5 @@
-#include "../pch.h"
-#include "../SolutionFactory.h"
-
+#include "pch.h"
+#include "SolutionFactory.h"
 
 struct Point
 {
@@ -101,7 +100,7 @@ struct BeaconMap
     }
 };
 
-void CSolution<2022, 15>::Execute(int Part)
+void CSolution<15>::Execute(int Part)
 {
     BeaconMap Map;
     std::ifstream fstream("Day15.txt"); 

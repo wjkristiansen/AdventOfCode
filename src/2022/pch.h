@@ -17,5 +17,3 @@
 #include <vector>
 
 #include <assert.h>
-
-#include <InCommand.h>

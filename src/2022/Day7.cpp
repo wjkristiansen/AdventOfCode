@@ -1,5 +1,5 @@
-#include "../pch.h"
-#include "../SolutionFactory.h"
+#include "pch.h"
+#include "SolutionFactory.h"
 
 class Node
 {
@@ -123,7 +123,7 @@ public:
     std::map<std::string, std::unique_ptr<Node>> m_ChildNodes;
 };
 
-void CSolution<2022, 7>::Execute(int)
+void CSolution<7>::Execute(int)
 {
     DirectoryNode root("/", nullptr);
     std::ifstream fstream("Day7.txt");

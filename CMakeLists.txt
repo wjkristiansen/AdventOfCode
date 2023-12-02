@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.6)
 
 project(advent_of_code
     VERSION 1.0
@@ -13,3 +13,7 @@ include_directories(
 
 add_subdirectory(src)
 add_subdirectory(InCommand)
+
+if(WIN32)
+    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT aocrunner)
+endif()

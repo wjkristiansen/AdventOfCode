@@ -1,5 +1,5 @@
-#include "../pch.h"
-#include "../SolutionFactory.h"
+#include "pch.h"
+#include "SolutionFactory.h"
 
 struct Tree
 {
@@ -14,7 +14,7 @@ struct Tree
     int ScenicScore() const { return VisibleDistUp * VisibleDistDown * VisibleDistLeft * VisibleDistRight; }
 };
 
-void CSolution<2022, 8>::Execute(int)
+void CSolution<8>::Execute(int)
 {
     std::ifstream fstream("Day8.txt");
     std::vector<std::vector<Tree>> grid;

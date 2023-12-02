@@ -1,5 +1,5 @@
-#include "../pch.h"
-#include "../SolutionFactory.h"
+#include "pch.h"
+#include "SolutionFactory.h"
 
 struct Point
 {
@@ -135,7 +135,7 @@ struct SandMap
     }
 };
 
-void CSolution<2022, 14>::Execute(int)
+void CSolution<14>::Execute(int)
 {
     int MinX = std::numeric_limits<int>::max();
     int MaxX = 0;

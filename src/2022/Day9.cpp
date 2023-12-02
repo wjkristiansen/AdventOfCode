@@ -1,5 +1,5 @@
-#include "../pch.h"
-#include "../SolutionFactory.h"
+#include "pch.h"
+#include "SolutionFactory.h"
 
 template<>
 struct std::hash<std::pair<int, int>>
@@ -10,7 +10,7 @@ struct std::hash<std::pair<int, int>>
     }
 };
 
-void CSolution<2022, 9>::Execute(int)
+void CSolution<9>::Execute(int)
 {
     std::ifstream fstream("Day9.txt");
     std::unordered_set<std::pair<int, int>> TailPosRecord;

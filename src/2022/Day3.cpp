@@ -1,5 +1,5 @@
-#include "../pch.h"
-#include "../SolutionFactory.h"
+#include "pch.h"
+#include "SolutionFactory.h"
 
 static constexpr size_t Priority(char c)
 {
@@ -12,7 +12,7 @@ static constexpr size_t Priority(char c)
     return 0;
 }
 
-void CSolution<2022, 3>::Execute(int)
+void CSolution<3>::Execute(int)
 {
     std::ifstream fstream("Day3.txt");
 

@@ -1,5 +1,5 @@
-#include "../pch.h"
-#include "../SolutionFactory.h"
+#include "pch.h"
+#include "SolutionFactory.h"
 
 enum class Op
 {
@@ -71,7 +71,7 @@ public:
     }
 };
 
-void CSolution<2022, 10>::Execute(int)
+void CSolution<10>::Execute(int)
 {
     std::ifstream fstream("Day10.txt");
     const int screenRows = 6;
