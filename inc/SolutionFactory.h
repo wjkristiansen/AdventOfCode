@@ -51,7 +51,10 @@ public:
         if(solutionIt == m_SolutionMap.end())
             throw(std::runtime_error("No solution declared for year/day pair."));
 
-        std::cout << "Day " << Day << ", Part " << Part << ": " << solutionIt->second.Name << std::endl;
+        if(Part == 0)
+            std::cout << "Day " << Day << ": " << solutionIt->second.Name << std::endl;
+        else
+            std::cout << "Day " << Day << ", Part " << Part << ": " << solutionIt->second.Name << std::endl;
 
         // Execute the solution
         auto FnExecute = solutionIt->second.FnExecute;
