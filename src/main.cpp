@@ -25,16 +25,16 @@ int main(int argc, const char *argv[])
     int MaxDay;
     Factory.MaxDate(MaxYear, MaxDay);
 
-    InCommand::CCommandReader CommandReader("advent", "Advent of Code", argc, argv);
-    InCommand::InCommandInt Year(MaxYear);
-    InCommand::InCommandInt Day(MaxDay);
-    InCommand::InCommandInt Part(2);
-    InCommand::InCommandBool ShowHelp;
-    CommandReader.DefaultCommandCtx()->DeclareVariableOption(Year, "year", "Advent of Code Year", 'y');
-    CommandReader.DefaultCommandCtx()->DeclareVariableOption(Day, "day", "Advent of Code Day", 'd');
-    CommandReader.DefaultCommandCtx()->DeclareVariableOption(Part, "part", InCommand::CInCommandVariableDomain(1, 2), "Indicates which part of a day's challenge to run", 'p');
-    CommandReader.DefaultCommandCtx()->DeclareSwitchOption(ShowHelp, "help", "Get help", 'h');
-    CommandReader.ReadOptions();
+    InCommand::CCommandReader CommandReader("advent", "Advent of Code");
+    InCommand::Int Year(MaxYear);
+    InCommand::Int Day(MaxDay);
+    InCommand::Int Part(2);
+    InCommand::Bool ShowHelp;
+    CommandReader.DeclareSwitchOption(Year, "year", "Advent of Code Year", 'y');
+    CommandReader.DeclareSwitchOption(Day, "day", "Advent of Code Day", 'd');
+    CommandReader.DeclareSwitchOption(Part, "part", InCommand::Domain(1, 2), "Indicates which part of a day's challenge to run", 'p');
+    CommandReader.DeclareBoolSwitchOption(ShowHelp, "help", "Get help", 'h');
+    CommandReader.ReadArguments(argc, argv);
 
     Factory.ExecuteSolution(Year.Value(), Day.Value(), Part.Value());
 
