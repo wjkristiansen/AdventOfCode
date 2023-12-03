@@ -11,6 +11,7 @@ void CSolution<2>::Execute(int part)
     const int maxBlue = 14;
 
     int possibleGamesSum = 0;
+    int sumPower = 0;
 
     for (;;)
     {
@@ -27,7 +28,9 @@ void CSolution<2>::Execute(int part)
         ss >> gameId;
         ss.ignore(2, ' ');
 
-        int turn = 0;
+        int minRed = 0;
+        int minGreen = 0;
+        int minBlue = 0;
         for (;!ss.eof();)
         {
             std::string turnString;
@@ -44,30 +47,37 @@ void CSolution<2>::Execute(int part)
                 countss >> count;
                 countss >> color;
 
-                if (color == "red" && count > maxRed)
+                if (color == "red")
                 {
-                    isPossible = false;
-                    break;
+                    if(count > maxRed)
+                        isPossible = false;
+
+                    if (count > minRed)
+                        minRed = count;
                 }
 
-                if (color == "green" && count > maxGreen)
+                if (color == "green")
                 {
-                    isPossible = false;
-                    break;
+                    if(count > maxGreen)
+                        isPossible = false;
+
+                    if (count > minGreen)
+                        minGreen = count;
                 }
 
-                if(color == "blue" && count > maxBlue)
+                if(color == "blue")
                 {
-                    isPossible = false;
-                    break;
-                }
-            }
+                    if(count > maxBlue)
+                        isPossible = false;
 
-            if (!isPossible)
-            {
-                break;
+                    if (count > minBlue)
+                        minBlue = count;
+                }
             }
         }
+
+        int power = minRed * minGreen * minBlue;
+        sumPower += power;
 
         if (isPossible)
         {
@@ -75,5 +85,6 @@ void CSolution<2>::Execute(int part)
         }
     }
 
-    std::cout << "Sum of possible game Ids: " << possibleGamesSum << std::endl;
+    std::cout << "Part 1: Sum of possible game Ids: " << possibleGamesSum << std::endl;
+    std::cout << "Part 2: Sum of powers: " << sumPower << std::endl;
 }
