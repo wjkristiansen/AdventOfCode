@@ -12,6 +12,7 @@ extern "C" DYNAMIC_EXPORT void ExecuteChallenge(int day, int part)
     CSolutionFactory Factory;
     Factory.DeclareSolution<1>("Trebuchet?!");
     Factory.DeclareSolution<2>("Cube Conundrum");
+    Factory.DeclareSolution<3>("Gear Ratios");
 
     std::cout << "Advent of Code 2023" << std::endl;
     
