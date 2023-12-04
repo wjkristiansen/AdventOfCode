@@ -19,6 +19,13 @@ void CSolution<3>::Execute(int part)
 
     std::vector<NumberEntry> NumberEntries;
 
+    struct Gear
+    {
+        int ratio = 1;
+        int count = 0;
+    };
+    std::unordered_map<int, Gear> Gears;
+
     int row = 0;
     for(;!fstream.eof(); ++row)
     {
@@ -78,6 +85,22 @@ void CSolution<3>::Execute(int part)
             return true;
         };
 
+    auto addGearNumber = [&maxCol, &Gears](int gearRow, int gearCol, int value)
+        {
+            auto gearId = gearRow * maxCol + gearCol;
+            auto it = Gears.find(gearId);
+            if (it != Gears.end())
+            {
+                Gear& g = it->second;
+                g.ratio *= value;
+                g.count++;
+            }
+            else
+            {
+                Gears.emplace(gearId, Gear{ value, 1 });
+            }
+        };
+
     int adjacentSum = 0;
     int numAdjacentNumbers = 0;
     // Iterate through the number entries and look for adjacent symbols
@@ -100,6 +123,10 @@ void CSolution<3>::Execute(int part)
                         numAdjacentNumbers++;
                         numEntry.isAdjacentToSymbol = true;
                         isAdjacent = true; // Signal that this entry has been counted
+                        if (Grid[row][col] == '*')
+                        {
+                            addGearNumber(row, col, numEntry.value);
+                        }
                         break;
                     }
                 }
@@ -119,6 +146,10 @@ void CSolution<3>::Execute(int part)
                     numAdjacentNumbers++;
                     numEntry.isAdjacentToSymbol = true;
                     isAdjacent = true; // Signal that this entry has been counted
+                    if (Grid[row][col] == '*')
+                    {
+                        addGearNumber(row, col, numEntry.value);
+                    }
                 }
             }
         }
@@ -135,6 +166,10 @@ void CSolution<3>::Execute(int part)
                     numAdjacentNumbers++;
                     numEntry.isAdjacentToSymbol = true;
                     isAdjacent = true; // Signal that this entry has been counted
+                    if (Grid[row][col] == '*')
+                    {
+                        addGearNumber(row, col, numEntry.value);
+                    }
                 }
             }
         }
@@ -153,6 +188,10 @@ void CSolution<3>::Execute(int part)
                         numAdjacentNumbers++;
                         numEntry.isAdjacentToSymbol = true;
                         isAdjacent = true; // Signal that this entry has been counted
+                        if (Grid[row][col] == '*')
+                        {
+                            addGearNumber(row, col, numEntry.value);
+                        }
                         break;
                     }
                 }
@@ -160,7 +199,20 @@ void CSolution<3>::Execute(int part)
         }
     }
 
+    int numRealGears = 0;
+    int sumGearRatios = 0;
+    for (auto [_, g] : Gears)
+    {
+        if (g.count == 2)
+        {
+            numRealGears++;
+            sumGearRatios += g.ratio;
+        }
+    }
+
     std::cout << "Total number entries: " << NumberEntries.size() << std::endl;
     std::cout << "Total entries with adjacent symbols: " << numAdjacentNumbers << std::endl;
     std::cout << "Sum of numbers adjacent to symbols: " << adjacentSum << std::endl;
+    std::cout << "Num actual gears: " << numRealGears << std::endl;
+    std::cout << "Sum gear ratios: " << sumGearRatios << std::endl;
 }
