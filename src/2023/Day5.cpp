@@ -17,7 +17,7 @@ void CSolution<5>::Execute(int part)
         {
         }
 
-        static MapRange MapRange::FromString(const std::string s)
+        static MapRange FromString(const std::string &s)
         {
             std::istringstream ss(s);
             std::int64_t sourceStart;
@@ -27,14 +27,22 @@ void CSolution<5>::Execute(int part)
             return MapRange(destStart, sourceStart, size);
         }
 
-        std::int64_t GetDest(std::int64_t source)
+        std::pair<std::int64_t, std::int64_t> GetDest(std::int64_t source)
         {
             std::int64_t offset = source - m_SourceStart;
             if(offset < 0 || offset > m_Size)
-                return source;
+                return std::make_pair(source, std::int64_t(0));
 
-            return m_DestStart + offset;
+            std::int64_t location = m_DestStart + offset;
+            std::int64_t toEnd = m_Size - offset;
+
+            return std::make_pair(location, toEnd);
         }
+
+        std::int64_t SourceStart() const { return m_SourceStart; }
+        std::int64_t SourceEnd() const { return m_SourceStart + m_Size; }
+        std::int64_t DestStart() const { return m_DestStart; }
+        std::int64_t DestEnd() const { return m_DestStart + m_Size; }
     };
 
     class Map
@@ -48,16 +56,25 @@ void CSolution<5>::Execute(int part)
             m_MapRanges.push_back(range);
         }
 
-        std::int64_t GetDest(std::int64_t source)
+        std::pair<std::int64_t, std::int64_t> GetDest(std::int64_t source)
         {
-            std::int64_t dest = source;
+            std::pair<std::int64_t, std::int64_t> dest = std::make_pair(source, std::int64_t(1));
 
+            std::int64_t distToNextRange = std::numeric_limits<int64_t>::max();
             for( auto &r : m_MapRanges)
             {
                 dest = r.GetDest(source);
-                if(dest != source)
+                if(dest.second > 0)
                     break;
+                if (r.SourceStart() > source)
+                {
+                    distToNextRange = std::min(r.SourceStart() - source, distToNextRange);
+                }
             }
+
+            // If not in a range...
+            if (dest.second == 0)
+                dest.second = distToNextRange; // ...set dest.second to next nearest range distance
 
             return dest;
         }
@@ -70,7 +87,13 @@ void CSolution<5>::Execute(int part)
     Map lightToTemperatureMap;
     Map temperatureToHumidityMap;
     Map humidityToLocationMap;
-    std::vector<std::int64_t> seeds;
+
+    struct SeedRange
+    {
+        std::int64_t Start;
+        std::int64_t Size;
+    };
+    std::vector<SeedRange> seeds;
 
     std::ifstream fstream("2023/Day5.txt");
     std::string line;
@@ -102,9 +125,10 @@ void CSolution<5>::Execute(int part)
             seedss.seekg(6);
             for (; !seedss.eof();)
             {
-                std::int64_t seedNum;
-                seedss >> seedNum;
-                seeds.push_back(seedNum);
+                std::int64_t seedRangeStart;
+                std::int64_t seedRangeSize;
+                seedss >> seedRangeStart >> seedRangeSize;
+                seeds.push_back(SeedRange{.Start = seedRangeStart, .Size = seedRangeSize});
             }
         }
         else if(line == "seed-to-soil map:")
@@ -139,18 +163,36 @@ void CSolution<5>::Execute(int part)
 
     // Iterate through the seeds and find nearest location
     std::int64_t nearest = std::numeric_limits<std::int64_t>::max();
-    for( auto &seed : seeds)
-    {
-        std::int64_t soil = seedToSoilMap.GetDest(seed);
-        std::int64_t fertilizer = soilToFertilizerMap.GetDest(soil);
-        std::int64_t water = fertilizerToWaterMap.GetDest(fertilizer);
-        std::int64_t light = waterToLightMap.GetDest(water);
-        std::int64_t temperature = lightToTemperatureMap.GetDest(light);
-        std::int64_t humidity = temperatureToHumidityMap.GetDest(temperature);
-        std::int64_t location = humidityToLocationMap.GetDest(humidity);
 
-        if(location < nearest)
-            nearest = location;
+    std::unordered_map<std::int64_t, std::int64_t> locationCache;
+    for( auto &seedRange : seeds)
+    {
+        std::int64_t increment = seedRange.Size;
+        for (std::int64_t seed = seedRange.Start; seed < seedRange.Start + seedRange.Size; )
+        {
+            std::pair<std::int64_t, std::int64_t> soil = seedToSoilMap.GetDest(seed);
+            increment = std::min(increment, soil.second);
+            std::pair<std::int64_t, std::int64_t> fertilizer = soilToFertilizerMap.GetDest(soil.first);
+            increment = std::min(increment, fertilizer.second);
+            std::pair<std::int64_t, std::int64_t> water = fertilizerToWaterMap.GetDest(fertilizer.first);
+            increment = std::min(increment, water.second);
+            std::pair<std::int64_t, std::int64_t> light = waterToLightMap.GetDest(water.first);
+            increment = std::min(increment, light.second);
+            std::pair<std::int64_t, std::int64_t> temperature = lightToTemperatureMap.GetDest(light.first);
+            increment = std::min(increment, temperature.second);
+            std::pair<std::int64_t, std::int64_t> humidity = temperatureToHumidityMap.GetDest(temperature.first);
+            increment = std::min(increment, humidity.second);
+            std::pair<std::int64_t, std::int64_t> location = humidityToLocationMap.GetDest(humidity.first);
+            increment = std::min(increment, location.second);
+
+            nearest = std::min(location.first, nearest);
+
+            // Increment seed number
+            seed += increment;
+
+            // Reset max increment for next iteration
+            increment = seedRange.Size - increment;
+        }
     }
 
     std::cout << "Nearest: " << nearest << std::endl;
