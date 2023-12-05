@@ -23,7 +23,6 @@ struct SolutionDesc
 // ------------------------------------------------------------------------------------------------
 class CSolutionFactory
 {
-    int m_MaxDay;
     std::map<int, SolutionDesc> m_SolutionMap;
 
 public:
@@ -35,8 +34,6 @@ public:
         {
             throw(std::runtime_error("Solution for given year/day pair has already been declared."));
         }
-
-        m_MaxDay = std::max(Day, m_MaxDay);
     }
 
     void ExecuteSolution(int Day, int Part) const
@@ -44,7 +41,7 @@ public:
         if(Day == 0)
         {
             // Default to max declared day
-            Day = m_MaxDay;
+            Day = MaxDay();
         }
 
         auto solutionIt = m_SolutionMap.find(Day);
@@ -61,5 +58,5 @@ public:
         FnExecute(Part);
     }
 
-    int MaxDay() const { return m_MaxDay;}
+    int MaxDay() const { return m_SolutionMap.rbegin()->first;}
 };
