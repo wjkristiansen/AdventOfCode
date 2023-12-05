@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <memory>
 #include <iostream>
+#include <chrono>
 
 #pragma once
 
@@ -38,6 +39,8 @@ public:
 
     void ExecuteSolution(int Day, int Part) const
     {
+        std::cout << "Executing day: " << Day << std::endl;
+
         if(Day == 0)
         {
             // Default to max declared day
@@ -55,7 +58,13 @@ public:
 
         // Execute the solution
         auto FnExecute = solutionIt->second.FnExecute;
+
+        std::chrono::high_resolution_clock clock;
+        auto t0 = clock.now();
         FnExecute(Part);
+        auto t1 = clock.now();
+        auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0);
+        std::cout << "Elapsed time in microseconds: " << microseconds << std::endl;
     }
 
     int MaxDay() const { return m_SolutionMap.rbegin()->first;}

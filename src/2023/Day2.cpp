@@ -53,7 +53,7 @@ void CSolution<2>::Execute(int part)
                         isPossible = false;
 
                     if (count > minRed)
-                        minRed = count;
+                        minRed = int(count);
                 }
 
                 if (color == "green")
@@ -62,7 +62,7 @@ void CSolution<2>::Execute(int part)
                         isPossible = false;
 
                     if (count > minGreen)
-                        minGreen = count;
+                        minGreen = int(count);
                 }
 
                 if(color == "blue")
@@ -71,7 +71,7 @@ void CSolution<2>::Execute(int part)
                         isPossible = false;
 
                     if (count > minBlue)
-                        minBlue = count;
+                        minBlue = int(count);
                 }
             }
         }
@@ -81,7 +81,7 @@ void CSolution<2>::Execute(int part)
 
         if (isPossible)
         {
-            possibleGamesSum += gameId;
+            possibleGamesSum += int(gameId);
         }
     }
 
