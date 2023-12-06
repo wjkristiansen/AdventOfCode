@@ -1,12 +1,12 @@
 #include "pch.h"
 #include "SolutionFactory.h"
 
-static std::pair<float, float> SolveQuadratic(float a, float b, float c)
+static std::pair<double, double> SolveQuadratic(double a, double b, double c)
 {
-    float radical = std::sqrt(b * b - 4 * a * c);
-    float denom = 2 * a;
-    float v1 = (-b - radical) / denom;
-    float v2 = (-b + radical) / denom;
+    double radical = std::sqrt(b * b - 4 * a * c);
+    double denom = 2 * a;
+    double v1 = (-b - radical) / denom;
+    double v2 = (-b + radical) / denom;
     return std::make_pair(v1, v2);
 }
 
@@ -14,8 +14,8 @@ void CSolution<6>::Execute(int part)
 {
     struct RaceParams
     {
-        int Duration;
-        int RecordDistance;
+        std::int64_t Duration;
+        std::int64_t RecordDistance;
     };
 
     std::vector<RaceParams> races;
@@ -23,27 +23,64 @@ void CSolution<6>::Execute(int part)
     std::ifstream fstream("2023/Day6.txt");
     std::string line;
 
-    // Get race times...
-    std::getline(fstream, line);
-    std::istringstream liness (line);
-    liness.ignore(32, ':'); // "Time:"
-    while(!liness.eof())
+    if (part == 1)
     {
-        int duration;
-        liness >> duration;
-        races.push_back(RaceParams{ duration, 0 });
+        // Get race times...
+        std::getline(fstream, line);
+        std::istringstream liness(line);
+        liness.ignore(32, ':'); // "Time:"
+        while (!liness.eof())
+        {
+            std::int64_t duration;
+            liness >> duration;
+            races.push_back(RaceParams{ duration, 0 });
+        }
+
+        // Get race records...
+        std::getline(fstream, line);
+        liness = std::istringstream(line);
+        liness.ignore(32, ':'); // "Distance:"
+        for (int i = 0; i < races.size(); ++i)
+        {
+            liness >> races[i].RecordDistance;
+        }
+    }
+    else
+    {
+        // Get race time...
+        std::getline(fstream, line);
+        std::istringstream liness(line);
+        liness.ignore(32, ':'); // "Time:"
+
+        std::int64_t duration = 0;
+        while (!liness.eof())
+        {
+            int c = liness.get();
+            if (c >= '0' && c <= '9')
+            {
+                duration = duration * 10 + (c - '0');
+            }
+        }
+
+        // Get race record...
+        std::getline(fstream, line);
+        liness = std::istringstream(line);
+        liness.ignore(32, ':'); // "Distance:"
+
+        std::int64_t record = 0;
+        while (!liness.eof())
+        {
+            int c = liness.get();
+            if (c >= '0' && c <= '9')
+            {
+                record = record * 10 + (c - '0');
+            }
+        }
+
+        races.push_back(RaceParams{ duration, record });
     }
 
-    // Get race records...
-    std::getline(fstream, line);
-    liness = std::istringstream(line);
-    liness.ignore(32, ':'); // "Distance:"
-    for (int i = 0; i < races.size(); ++i)
-    {
-        liness >> races[i].RecordDistance;
-    }
-
-    int product = 1;
+    std::int64_t product = 1;
     for(auto race : races)
     {
         // Using:
@@ -68,14 +105,14 @@ void CSolution<6>::Execute(int part)
         // values of V:
         // Vmin = (T - sqrt(T^2 - 4R)) / 2
         // Vmax = (T + sqrt(T^2 - 4R)) / 2
-        float T = float(race.Duration);
-        float R = float(race.RecordDistance);
+        double T = (race.Duration);
+        double R = double(race.RecordDistance);
         auto range = SolveQuadratic(1, -T, R);
 
         // Convert ranges to integers
 
-        float fminT = std::ceil(range.first);
-        float fmaxT = std::floor(range.second);
+        double fminT = std::ceil(range.first);
+        double fmaxT = std::floor(range.second);
 
         // Handle inequality
         if (fminT == range.first)
@@ -83,19 +120,19 @@ void CSolution<6>::Execute(int part)
         if (fmaxT == range.second)
             fmaxT -= 1.0f;
 
-        int minT((int) fminT);
-        int maxT((int) fmaxT);
+        std::int64_t minT((std::int64_t) fminT);
+        std::int64_t maxT((std::int64_t) fmaxT);
 
         std::cout << "Min speed: " << fminT << "(" << minT << "), Max speed: " << fmaxT << "(" << maxT << ")" << std::endl;
 
-        int minD = minT * (race.Duration - minT);
-        int maxD = maxT * (race.Duration - maxT);
+        std::int64_t minD = minT * (race.Duration - minT);
+        std::int64_t maxD = maxT * (race.Duration - maxT);
 
         std::cout << "Min distance: " << minD << ", Max distance: " << maxD << std::endl;
         assert(minD > race.RecordDistance);
         assert(maxD > race.RecordDistance);
 
-        int count = maxT - minT + 1;
+        std::int64_t count = maxT - minT + 1;
 
         std::cout << "Count: " << count << std::endl;
         product *= count;
