@@ -39,8 +39,6 @@ public:
 
     void ExecuteSolution(int Day, int Part) const
     {
-        std::cout << "Executing day: " << Day << std::endl;
-
         if(Day == 0)
         {
             // Default to max declared day
@@ -64,6 +62,7 @@ public:
         FnExecute(Part);
         auto t1 = clock.now();
         auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0);
+        std::cout << std::endl;
         std::cout << "Elapsed time in microseconds: " << microseconds << std::endl;
     }
 
