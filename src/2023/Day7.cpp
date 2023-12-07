@@ -18,36 +18,50 @@ public:
 
     int Bid;
     std::string Cards;
-    std::map<char, int> CardMap;
     int MaxDuplicates = 0;
+    int NumJokers = 0;
     TYPE Type;
 
     Hand(const std::string &cards, int bid) :
         Bid(bid),
         Cards{cards}
     {
+        std::map<char, int> CardMap;
         for(char c : cards)
         {
-            CardMap[c] += 1;
-            if (CardMap[c] > MaxDuplicates)
-                MaxDuplicates = CardMap[c];
+            if (c == 'J')
+            {
+                NumJokers++;
+            }
+            else
+            {
+                if (CardValue(c) > 0)
+                {
+                    CardMap[c] += 1;
+                    if (CardMap[c] > MaxDuplicates)
+                        MaxDuplicates = CardMap[c];
+                }
+            }
         }
 
+        // Calculate type of hand
         Type = UNKNOWN;
 
         switch (CardMap.size())
         {
+        case 0:
         case 1:
+            assert(CardMap.size() == 1 || NumJokers == 5);
             Type = FIVE_OF_A_KIND;
             break;
         case 2:
-            if (MaxDuplicates == 4)
+            if (MaxDuplicates + NumJokers == 4)
                 Type = FOUR_OF_A_KIND;
             else
                 Type = FULL_HOUSE;
             break;
         case 3:
-            if (MaxDuplicates == 3)
+            if (MaxDuplicates + NumJokers == 3)
                 Type = THREE_OF_A_KIND;
             else
                 Type = TWO_PAIR;
@@ -61,7 +75,7 @@ public:
         }
     }
 
-    static int CardValue(char c)
+    static constexpr int CardValue(char c)
     {
         switch (c)
         {
@@ -75,11 +89,13 @@ public:
         case '8': return 8;
         case '9': return 9;
         case 'T': return 10;
-        case 'J': return 11;
+        case 'J': return 0;
         case 'Q': return 12;
         case 'K': return 13;
         case 'A': return 14;
         }
+
+        return -1;
     }
 
     bool operator<(const Hand &o) const
@@ -113,6 +129,8 @@ void CSolution<7>::Execute(int part)
     for (;!fstream.eof();)
     {
         std::getline(fstream, line);
+        if (line.empty())
+            break;
         std::istringstream ss(line);
         std::string cards;
         int bid;
@@ -121,7 +139,7 @@ void CSolution<7>::Execute(int part)
     }
 
     int rank = 1;
-    int sum = 0;
+    std::int64_t sum = 0;
     for(auto &hand : hands)
     {
         std::cout << "Hand " << rank << ": " << hand.Cards << ", Bid: " << hand.Bid << std::endl;
