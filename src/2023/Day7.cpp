@@ -142,7 +142,7 @@ void CSolution<7>::Execute(int part)
     std::int64_t sum = 0;
     for(auto &hand : hands)
     {
-        std::cout << "Hand " << rank << ": " << hand.Cards << ", Bid: " << hand.Bid << std::endl;
+//        std::cout << "Hand " << rank << ": " << hand.Cards << ", Bid: " << hand.Bid << std::endl;
         sum += hand.Bid * rank;
         ++rank;
     }
