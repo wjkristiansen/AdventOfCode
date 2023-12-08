@@ -105,7 +105,7 @@ void CSolution<6>::Execute(int part)
         // values of V:
         // Vmin = (T - sqrt(T^2 - 4R)) / 2
         // Vmax = (T + sqrt(T^2 - 4R)) / 2
-        double T = (race.Duration);
+        double T = double(race.Duration);
         double R = double(race.RecordDistance);
         auto range = SolveQuadratic(1, -T, R);
 
