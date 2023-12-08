@@ -17,6 +17,7 @@ extern "C" DYNAMIC_EXPORT void ExecuteChallenge(int day, int part)
     Factory.DeclareSolution<5>("If You Give A Seed A Fertilizer");
     Factory.DeclareSolution<6>("Wait For It");
     Factory.DeclareSolution<7>("Camel Cards");
+    Factory.DeclareSolution<8>("Haunted Wasteland");
 
     std::cout << "Advent of Code 2023" << std::endl;
     

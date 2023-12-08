@@ -16,5 +16,6 @@
 #include <unordered_set>
 #include <vector>
 #include <limits>
+#include <regex>
 
 #include <assert.h>
