@@ -17,5 +17,6 @@
 #include <vector>
 #include <limits>
 #include <regex>
+#include <numeric>
 
 #include <assert.h>
