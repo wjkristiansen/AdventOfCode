@@ -15,7 +15,7 @@ void CSolution<9>::Execute(int part)
 
         // Read the top-level series
         std::istringstream ss(line);
-        std::vector<int64_t> series;
+        std::deque<int64_t> series;
         bool isAllZeros = true;
         for (;!ss.eof();)
         {
@@ -26,7 +26,7 @@ void CSolution<9>::Execute(int part)
                 isAllZeros = false;
         }
 
-        std::deque<std::vector<int64_t>> seriesStack;
+        std::deque<std::deque<int64_t>> seriesStack;
         // Compose the next series
         for (;;)
         {
@@ -50,11 +50,11 @@ void CSolution<9>::Execute(int part)
         // Calculate the extrapolated value of each series
         for (size_t i = seriesStack.size() - 1; i > 0; --i)
         {
-            int64_t extrap = seriesStack[i - 1].back() + seriesStack[i].back(); 
-            seriesStack[i - 1].push_back(extrap);
+            int64_t extrap = seriesStack[i - 1].front() - seriesStack[i].front(); 
+            seriesStack[i - 1].push_front(extrap);
         }
 
-        sum += seriesStack[0].back();
+        sum += seriesStack[0].front();
     }
 
     std::cout << "Top-level extrapolated values: " << sum << std::endl;
