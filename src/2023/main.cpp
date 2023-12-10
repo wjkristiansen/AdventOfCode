@@ -7,20 +7,13 @@
 #define DYNAMIC_EXPORT __attribute__((visibility("default")))
 #endif
 
+std::unique_ptr<CSolutionFactory> CSolutionFactory::m_pSingleton;
+
 extern "C" DYNAMIC_EXPORT void ExecuteChallenge(int day, int part)
 {
-    CSolutionFactory Factory;
-    Factory.DeclareSolution<1>("Trebuchet?!");
-    Factory.DeclareSolution<2>("Cube Conundrum");
-    Factory.DeclareSolution<3>("Gear Ratios");
-    Factory.DeclareSolution<4>("Scratchcards");
-    Factory.DeclareSolution<5>("If You Give A Seed A Fertilizer");
-    Factory.DeclareSolution<6>("Wait For It");
-    Factory.DeclareSolution<7>("Camel Cards");
-    Factory.DeclareSolution<8>("Haunted Wasteland");
-    Factory.DeclareSolution<9>("Mirage Maintenance");
+    CSolutionFactory* pFactory = CSolutionFactory::GetFactory();
 
     std::cout << "Advent of Code 2023" << std::endl;
     
-    Factory.ExecuteSolution(day, part);
+    pFactory->ExecuteSolution(day, part);
 }

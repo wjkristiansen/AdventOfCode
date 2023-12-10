@@ -6,38 +6,47 @@
 
 #pragma once
 
-// ------------------------------------------------------------------------------------------------
-template<int Day>
-class CSolution
+class CSolutionBase
 {
-public:
-    static void Execute(int Part);
-};
+    std::string m_Title;
 
-// ------------------------------------------------------------------------------------------------
-struct SolutionDesc
-{
-    std::string Name;
-    void (*FnExecute)(int Part);
+public:
+    CSolutionBase(int Day, const std::string& name);
+    
+    const char* GetTitle() const { return m_Title.c_str(); }
+
+    virtual void Execute(int part) = 0;
 };
 
 // ------------------------------------------------------------------------------------------------
 class CSolutionFactory
 {
-    std::map<int, SolutionDesc> m_SolutionMap;
+    std::map<int, CSolutionBase *> m_SolutionMap;
+    static std::unique_ptr<CSolutionFactory> m_pSingleton;
 
 public:
-    template<int Day>
-    void DeclareSolution(const std::string &Name)
+    CSolutionFactory() = default;
+
+    static CSolutionFactory *GetFactory()
     {
-        auto [_, Success] = m_SolutionMap.emplace(Day, SolutionDesc{Name, CSolution<Day>::Execute});
+        if (m_pSingleton.get() == nullptr)
+        {
+            m_pSingleton = std::make_unique<CSolutionFactory>();
+        }
+
+        return m_pSingleton.get();
+    }
+
+    void DeclareSolution(int day, CSolutionBase *pSolution)
+    {
+        auto [_, Success] = m_SolutionMap.emplace(day, pSolution);
         if(!Success)
         {
-            throw(std::runtime_error("Solution for given year/day pair has already been declared."));
+            throw(std::runtime_error("Solution for given day pair has already been declared."));
         }
     }
 
-    void ExecuteSolution(int Day, int Part) const
+    void ExecuteSolution(int Day, int Part)
     {
         if(Day == 0)
         {
@@ -49,17 +58,16 @@ public:
         if(solutionIt == m_SolutionMap.end())
             throw(std::runtime_error("No solution declared for year/day pair."));
 
-        if(Part == 0)
-            std::cout << "Day " << Day << ": " << solutionIt->second.Name << std::endl;
-        else
-            std::cout << "Day " << Day << ", Part " << Part << ": " << solutionIt->second.Name << std::endl;
+        CSolutionBase* pSolution = solutionIt->second;
 
-        // Execute the solution
-        auto FnExecute = solutionIt->second.FnExecute;
+        if(Part == 0)
+            std::cout << "Day " << Day << ": " << pSolution->GetTitle() << std::endl;
+        else
+            std::cout << "Day " << Day << ", Part " << Part << ": " << pSolution->GetTitle() << std::endl;
 
         std::chrono::high_resolution_clock clock;
         auto t0 = clock.now();
-        FnExecute(Part);
+        pSolution->Execute(Part);
         auto t1 = clock.now();
         auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0);
         std::cout << std::endl;
@@ -68,3 +76,10 @@ public:
 
     int MaxDay() const { return m_SolutionMap.rbegin()->first;}
 };
+
+inline CSolutionBase::CSolutionBase(int Day, const std::string& name):
+    m_Title(name)
+{
+    CSolutionFactory *pFactory = CSolutionFactory::GetFactory();
+    pFactory->DeclareSolution(Day, this);
+}

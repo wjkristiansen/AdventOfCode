@@ -1,90 +1,100 @@
 #include "pch.h"
 #include "SolutionFactory.h"
 
-void CSolution<2>::Execute(int part)
+class CSolution2 : public CSolutionBase
 {
-    std::ifstream fstream("2023/Day2p1.txt");
-    std::string line;
-
-    const int maxRed = 12;
-    const int maxGreen = 13;
-    const int maxBlue = 14;
-
-    int possibleGamesSum = 0;
-    int sumPower = 0;
-
-    for (;;)
+public:
+    CSolution2() : CSolutionBase(2, "Cube Conundrum")
     {
-        bool isPossible = true;
-        std::getline(fstream, line);
-        if (line.empty())
-            break;
+    }
 
-        std::istringstream ss(line);
-        std::string game;
-        size_t gameId;
-        ss >> game;
-        assert(game == std::string("Game"));
-        ss >> gameId;
-        ss.ignore(2, ' ');
+    virtual void Execute(int part)
+    {
+        std::ifstream fstream("2023/Day2p1.txt");
+        std::string line;
 
-        int minRed = 0;
-        int minGreen = 0;
-        int minBlue = 0;
-        for (;!ss.eof();)
+        const int maxRed = 12;
+        const int maxGreen = 13;
+        const int maxBlue = 14;
+
+        int possibleGamesSum = 0;
+        int sumPower = 0;
+
+        for (;;)
         {
-            std::string turnString;
-            std::getline(ss, turnString, ';');
-            std::istringstream turnss(turnString);
+            bool isPossible = true;
+            std::getline(fstream, line);
+            if (line.empty())
+                break;
 
-            for (; !turnss.eof();)
+            std::istringstream ss(line);
+            std::string game;
+            size_t gameId;
+            ss >> game;
+            assert(game == std::string("Game"));
+            ss >> gameId;
+            ss.ignore(2, ' ');
+
+            int minRed = 0;
+            int minGreen = 0;
+            int minBlue = 0;
+            for (;!ss.eof();)
             {
-                size_t count;
-                std::string color;
-                std::string colorCount;
-                std::getline(turnss, colorCount, ',');
-                std::istringstream countss(colorCount);
-                countss >> count;
-                countss >> color;
+                std::string turnString;
+                std::getline(ss, turnString, ';');
+                std::istringstream turnss(turnString);
 
-                if (color == "red")
+                for (; !turnss.eof();)
                 {
-                    if(count > maxRed)
-                        isPossible = false;
+                    size_t count;
+                    std::string color;
+                    std::string colorCount;
+                    std::getline(turnss, colorCount, ',');
+                    std::istringstream countss(colorCount);
+                    countss >> count;
+                    countss >> color;
 
-                    if (count > minRed)
-                        minRed = int(count);
+                    if (color == "red")
+                    {
+                        if(count > maxRed)
+                            isPossible = false;
+
+                        if (count > minRed)
+                            minRed = int(count);
+                    }
+
+                    if (color == "green")
+                    {
+                        if(count > maxGreen)
+                            isPossible = false;
+
+                        if (count > minGreen)
+                            minGreen = int(count);
+                    }
+
+                    if(color == "blue")
+                    {
+                        if(count > maxBlue)
+                            isPossible = false;
+
+                        if (count > minBlue)
+                            minBlue = int(count);
+                    }
                 }
+            }
 
-                if (color == "green")
-                {
-                    if(count > maxGreen)
-                        isPossible = false;
+            int power = minRed * minGreen * minBlue;
+            sumPower += power;
 
-                    if (count > minGreen)
-                        minGreen = int(count);
-                }
-
-                if(color == "blue")
-                {
-                    if(count > maxBlue)
-                        isPossible = false;
-
-                    if (count > minBlue)
-                        minBlue = int(count);
-                }
+            if (isPossible)
+            {
+                possibleGamesSum += int(gameId);
             }
         }
 
-        int power = minRed * minGreen * minBlue;
-        sumPower += power;
-
-        if (isPossible)
-        {
-            possibleGamesSum += int(gameId);
-        }
+        std::cout << "Part 1: Sum of possible game Ids: " << possibleGamesSum << std::endl;
+        std::cout << "Part 2: Sum of powers: " << sumPower << std::endl;
     }
+};
 
-    std::cout << "Part 1: Sum of possible game Ids: " << possibleGamesSum << std::endl;
-    std::cout << "Part 2: Sum of powers: " << sumPower << std::endl;
-}
+static CSolution2 Solution;
