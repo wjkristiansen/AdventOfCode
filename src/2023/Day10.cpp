@@ -10,98 +10,111 @@ public:
 
     std::vector<std::string> m_PipeGrid;
 
-    enum class CompassDirection
+    enum COMPASS_DIR
     {
-        North = 0,
-        South,
-        East,
-        West
+        COMPASS_DIR_NORTH = 1 << 0,
+        COMPASS_DIR_SOUTH = 1 << 1,
+        COMPASS_DIR_EAST = 1 << 2,
+        COMPASS_DIR_WEST = 1 << 3,
     };
 
-    CompassDirection Step(CompassDirection in, int& x, int& y)
+    COMPASS_DIR Step(COMPASS_DIR in, int& x, int& y)
     {
-        CompassDirection direction;
+        COMPASS_DIR direction;
 
-        char tile = m_PipeGrid[y][x];
+        char &shape = m_PipeGrid[y][x];
+
         switch (in)
         {
-        case CompassDirection::North:
-            switch(tile)
+        case COMPASS_DIR_NORTH:
+            switch(shape)
             {
             case '|':
+                shape = '!';
                 y += 1;
-                direction = CompassDirection::North;
+                direction = COMPASS_DIR_NORTH;
                 break;
             case 'L':
+                shape = 'l';
                 x += 1;
-                direction = CompassDirection::West;
+                direction = COMPASS_DIR_WEST;
                 break;
             case 'J':
+                shape = 'j';
                 x -= 1;
-                direction = CompassDirection::East;
+                direction = COMPASS_DIR_EAST;
                 break;
             default:
-                assert(!"Unexpected pipe tile");
+                assert(!"Unexpected pipe shape");
                 break;
             }
             break;
-        case CompassDirection::South:
-            switch(tile)
+        case COMPASS_DIR_SOUTH:
+            switch(shape)
             {
             case '|':
+                shape = '!';
                 y -= 1;
-                direction = CompassDirection::South;
+                direction = COMPASS_DIR_SOUTH;
                 break;
             case '7':
+                shape = '&';
                 x -= 1;
-                direction = CompassDirection::East;
+                direction = COMPASS_DIR_EAST;
                 break;
             case 'F':
+                shape = 'f';
                 x += 1;
-                direction = CompassDirection::West;
+                direction = COMPASS_DIR_WEST;
                 break;
             default:
-                assert(!"Unexpected pipe tile");
+                assert(!"Unexpected pipe shape");
                 break;
             }
             break;
-        case CompassDirection::East:
-            switch(tile)
+        case COMPASS_DIR_EAST:
+            switch(shape)
             {
             case '-':
+                shape = '_';
                 x -= 1;
-                direction = CompassDirection::East;
+                direction = COMPASS_DIR_EAST;
                 break;
             case 'L':
+                shape = 'l';
                 y -= 1;
-                direction = CompassDirection::South;
+                direction = COMPASS_DIR_SOUTH;
                 break;
             case 'F':
+                shape = 'f';
                 y += 1;
-                direction = CompassDirection::North;
+                direction = COMPASS_DIR_NORTH;
                 break;
             default:
-                assert(!"Unexpected pipe tile");
+                assert(!"Unexpected pipe shape");
                 break;
             }
             break;
-        case CompassDirection::West:
-            switch(tile)
+        case COMPASS_DIR_WEST:
+            switch(shape)
             {
             case '-':
+                shape = '_';
                 x += 1;
-                direction = CompassDirection::West;
+                direction = COMPASS_DIR_WEST;
                 break;
             case '7':
+                shape = '&';
                 y += 1;
-                direction = CompassDirection::North;
+                direction = COMPASS_DIR_NORTH;
                 break;
             case 'J':
+                shape = 'j';
                 y -= 1;
-                direction = CompassDirection::South;
+                direction = COMPASS_DIR_SOUTH;
                 break;
             default:
-                assert(!"Unexpected pipe tile");
+                assert(!"Unexpected pipe shape");
                 break;
             }
             break;
@@ -142,56 +155,91 @@ public:
         int gridHeight = (int)m_PipeGrid.size();
         int seekX[2];
         int seekY[2];
-        CompassDirection fromDirection[2];
+        COMPASS_DIR fromDirection[2];
 
         // Identify the two possible directions to move from start
         int pathIndex = 0;
-        char tile = m_PipeGrid[coordY - 1][coordX];
+        int dirMask = 0;
         if (coordY > 0)
         {
-            if (tile == '|' || tile == 'F' || tile == '7')
+            char shape = m_PipeGrid[coordY - 1][coordX];
+            if (shape == '|' || shape == 'F' || shape == '7')
             {
                 seekX[pathIndex] = coordX;
                 seekY[pathIndex] = coordY - 1;
-                fromDirection[pathIndex] = CompassDirection::South;
+                auto dir = COMPASS_DIR_SOUTH;
+                fromDirection[pathIndex] = dir;
+                dirMask = dirMask | dir;
                 pathIndex++;
             }
         }
 
         if (coordY < gridHeight - 1 && pathIndex < 2)
         {
-            tile = m_PipeGrid[coordY + 1][coordX];
-            if (tile == '|' || tile == 'J' || tile == 'L')
+            char shape = m_PipeGrid[coordY + 1][coordX];
+            if (shape == '|' || shape == 'J' || shape == 'L')
             {
                 seekX[pathIndex] = coordX;
                 seekY[pathIndex] = coordY + 1;
-                fromDirection[pathIndex] = CompassDirection::North;
+                auto dir = COMPASS_DIR_NORTH;
+                fromDirection[pathIndex] = dir;
+                dirMask = dirMask | dir;
                 pathIndex++;
             }
         }
 
         if (coordX > 0 && pathIndex < 2)
         {
-            tile = m_PipeGrid[coordY][coordX - 1];
-            if (tile == '-' || tile == 'F' || tile == 'L')
+            char shape = m_PipeGrid[coordY][coordX - 1];
+            if (shape == '-' || shape == 'F' || shape == 'L')
             {
                 seekX[pathIndex] = coordX - 1;
                 seekY[pathIndex] = coordY;
-                fromDirection[pathIndex] = CompassDirection::East;
+                auto dir = COMPASS_DIR_EAST;
+                fromDirection[pathIndex] = dir;
+                dirMask = dirMask | dir;
                 pathIndex++;
             }
         }
 
         if (coordX < gridWidth - 1 && pathIndex < 2)
         {
-            tile = m_PipeGrid[coordY][coordX + 1];
-            if (tile == '-' || tile == 'J' || tile == '7')
+            char shape = m_PipeGrid[coordY][coordX + 1];
+            if (shape == '-' || shape == 'J' || shape == '7')
             {
                 seekX[pathIndex] = coordX + 1;
                 seekY[pathIndex] = coordY;
-                fromDirection[pathIndex] = CompassDirection::West;
+                auto dir = COMPASS_DIR_WEST;
+                fromDirection[pathIndex] = dir;
+                dirMask = dirMask | dir;
                 pathIndex++;
             }
+        }
+
+        // Replace the 'S' with either equivalent pipe symbol
+        switch (dirMask)
+        {
+        case COMPASS_DIR_NORTH | COMPASS_DIR_SOUTH:
+            m_PipeGrid[coordY][coordX] = '!';
+            break;
+        case COMPASS_DIR_EAST | COMPASS_DIR_WEST:
+            m_PipeGrid[coordY][coordX] = '_';
+            break;
+        case COMPASS_DIR_EAST | COMPASS_DIR_NORTH:
+            m_PipeGrid[coordY][coordX] = '&';
+            break;
+        case COMPASS_DIR_EAST | COMPASS_DIR_SOUTH:
+            m_PipeGrid[coordY][coordX] = 'j';
+            break;
+        case COMPASS_DIR_WEST | COMPASS_DIR_NORTH:
+            m_PipeGrid[coordY][coordX] = 'f';
+            break;
+        case COMPASS_DIR_WEST | COMPASS_DIR_SOUTH:
+            m_PipeGrid[coordY][coordX] = 'l';
+            break;
+        default:
+            m_PipeGrid[coordY][coordX] = '0'; // Error
+            break;
         }
 
         // Ensure we found two directions
@@ -210,7 +258,71 @@ public:
                 break;
         }
 
+        for (auto& row : m_PipeGrid)
+        {
+            std::cout << row << std::endl;
+        }
+        std::cout << std::endl;
+
+        // One extra step to patch the last pipe section with either '!' or '_'
+        fromDirection[0] = Step(fromDirection[0], seekX[0], seekY[0]);
+
+        // Scan for interior spaces in grid
+        // Each encounter with '!' toggles the in/out status
+        int insideCount = 0;
+        for (coordY = 0; coordY < gridHeight; ++coordY)
+        {
+            bool isInside = false;
+            int edgeMask = 0;
+            for (coordX = 0; coordX < gridWidth; ++coordX)
+            {
+                switch (m_PipeGrid[coordY][coordX])
+                {
+                case 'l':
+                    edgeMask = COMPASS_DIR_SOUTH;
+                    isInside = !isInside;
+                    break;
+                case 'f':
+                    edgeMask = COMPASS_DIR_NORTH;
+                    isInside = !isInside;
+                    break;
+                case 'j':
+                    if(edgeMask == COMPASS_DIR_SOUTH)
+                        isInside = !isInside; // U-turn
+                    edgeMask = 0;
+                    break;
+                case '&':
+                    if (edgeMask == COMPASS_DIR_NORTH)
+                        isInside = !isInside; // U-turn
+                    edgeMask = 0;
+                    break;
+                case '!':
+                    isInside = !isInside;
+                    break;
+                case '_':
+                    break;
+                default:
+                    if (isInside)
+                    {
+                        ++insideCount;
+                        m_PipeGrid[coordY][coordX] = 'I';
+                    }
+                    else
+                    {
+                        m_PipeGrid[coordY][coordX] = 'O';
+                    }
+                    break;
+                }
+            }
+        }
+
+        for (auto &row : m_PipeGrid)
+        {
+            std::cout << row << std::endl;
+        }
+
         std::cout << "Steps: " << step << std::endl;
+        std::cout << "Interior tiles: " << insideCount << std::endl;
     }
 };
 
