@@ -4,7 +4,7 @@
 class CSolution5 : public CSolutionBase
 {
 public:
-    CSolution5() : CSolutionBase(5, "If You Give A Seed A Fertilizer")
+    CSolution5() : CSolutionBase()
     {
     }
 
@@ -206,4 +206,4 @@ public:
     }
 };
 
-static CSolution5 Solution;
+static CSolutionFactory::CSolutionAllocator<CSolution5> SolutionAllocator(5, "If You Give A Seed A Fertilizer");

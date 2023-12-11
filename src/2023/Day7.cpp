@@ -4,7 +4,7 @@
 class CSolution7 : public CSolutionBase
 {
 public:
-    CSolution7() : CSolutionBase(7, "Camel Cards")
+    CSolution7() : CSolutionBase()
     {
     }
 
@@ -158,4 +158,4 @@ public:
     }
 };
 
-static CSolution7 Solution;
+static CSolutionFactory::CSolutionAllocator<CSolution7> SolutionAllocator(7, "Camel Cards");

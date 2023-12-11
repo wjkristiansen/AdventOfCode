@@ -1,10 +1,10 @@
 #include "pch.h"
 #include "SolutionFactory.h"
 
-class CSolution1 : public CSolutionBase
+class CSolution1: public CSolutionBase
 {
 public:
-    CSolution1() : CSolutionBase(1, "Trebuchet?!")
+    CSolution1() : CSolutionBase()
     {
     }
 
@@ -138,4 +138,4 @@ public:
     }
 };
 
-static CSolution1 Solution;
+static CSolutionFactory::CSolutionAllocator<CSolution1> SolutionAllocator(1, "Trebuchet?!");

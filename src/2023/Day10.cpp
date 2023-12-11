@@ -4,7 +4,7 @@
 class CSolution10 : public CSolutionBase
 {
 public:
-    CSolution10() : CSolutionBase(10, "Pipe Maze")
+    CSolution10() : CSolutionBase()
     {
     }
 
@@ -326,4 +326,4 @@ public:
     }
 };
 
-static CSolution10 Solution;
+static CSolutionFactory::CSolutionAllocator<CSolution10> SolutionAllocator(10, "Pipe Maze");

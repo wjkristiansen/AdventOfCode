@@ -4,7 +4,7 @@
 class CSolution3 : public CSolutionBase
 {
 public:
-    CSolution3() : CSolutionBase(3, "Gear Ratios")
+    CSolution3() : CSolutionBase()
     {
     }
 
@@ -225,4 +225,4 @@ public:
     }
 };
 
-static CSolution3 Solution;
+static CSolutionFactory::CSolutionAllocator<CSolution3> SolutionAllocator(3, "Gear Ratios");

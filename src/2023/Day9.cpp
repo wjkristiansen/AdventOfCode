@@ -4,7 +4,7 @@
 class CSolution9 : public CSolutionBase
 {
 public:
-    CSolution9() : CSolutionBase(9, "Mirage Maintenance")
+    CSolution9() : CSolutionBase()
     {
     }
 
@@ -68,5 +68,5 @@ public:
     }
 };
 
-static CSolution9 Solution;
+static CSolutionFactory::CSolutionAllocator<CSolution9> SolutionAllocator(9, "Mirage Maintenance");
 

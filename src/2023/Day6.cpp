@@ -4,7 +4,7 @@
 class CSolution6 : public CSolutionBase
 {
 public:
-    CSolution6() : CSolutionBase(6, "Wait For It")
+    CSolution6() : CSolutionBase()
     {
     }
 
@@ -157,4 +157,4 @@ public:
     }
 };
 
-static CSolution6 Solution;
+static CSolutionFactory::CSolutionAllocator<CSolution6> SolutionAllocator(6, "Wait For It");

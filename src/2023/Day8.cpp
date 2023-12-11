@@ -4,7 +4,7 @@
 class CSolution8 : public CSolutionBase
 {
 public:
-    CSolution8() : CSolutionBase(8, "Haunted Wasteland")
+    CSolution8() : CSolutionBase()
     {
     }
 
@@ -101,4 +101,4 @@ public:
     }
 };
 
-static CSolution8 Solution;
+static CSolutionFactory::CSolutionAllocator<CSolution8> SolutionAllocator(8, "Haunted Wasteland");

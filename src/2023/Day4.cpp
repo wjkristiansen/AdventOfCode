@@ -4,7 +4,7 @@
 class CSolution4 : public CSolutionBase
 {
 public:
-    CSolution4() : CSolutionBase(4, "Scratchcards")
+    CSolution4() : CSolutionBase()
     {
     }
 
@@ -153,5 +153,5 @@ public:
     }
 };
 
-static CSolution4 Solution;
+static CSolutionFactory::CSolutionAllocator<CSolution4> SolutionAllocator(4, "Scratchcards");
 
