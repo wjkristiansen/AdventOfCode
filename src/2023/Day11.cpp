@@ -3,19 +3,20 @@
 
 class CSolution11: public CSolutionBase
 {
-    std::vector<int> m_GalacticRow;
-    std::vector<int> m_GalacticCol;
+    std::vector<int64_t> m_GalacticRow;
+    std::vector<int64_t> m_GalacticCol;
     std::vector<std::string> m_GalaxyMap;
-    std::vector<std::pair<int, int>> m_GalaxyCoords;
+    std::vector<std::pair<int64_t, int64_t>> m_GalaxyCoords;
+    const int expansionAmount = 1000000;
 
-    std::pair<int, int> GalacticCoordinate(const std::pair<int, int>& mapCoord)
+    std::pair<int64_t, int64_t> GalacticCoordinate(const std::pair<int64_t, int64_t>& mapCoord)
     {
         return std::make_pair(
             m_GalacticRow[mapCoord.first],
             m_GalacticCol[mapCoord.second]);
     }
 
-    int GalacticDistance(const std::pair<int, int>& coord1, const std::pair<int, int>& coord2)
+    int64_t GalacticDistance(const std::pair<int64_t, int64_t>& coord1, const std::pair<int64_t, int64_t>& coord2)
     {
         return std::abs(coord2.first - coord1.first) + std::abs(coord2.second - coord1.second);
     }
@@ -40,7 +41,7 @@ public:
         }
 
         const int mapWidth = (int) m_GalaxyMap[0].length();
-        const int mapHeight = (int)m_GalaxyMap.size();
+        const int mapHeight = (int) m_GalaxyMap.size();
 
         m_GalacticRow.resize(mapWidth);
         m_GalacticCol.resize(mapHeight);
@@ -63,22 +64,17 @@ public:
 
             m_GalacticRow[row] = expandedRow;
 
-            ++expandedRow;
-
-            if (isRowEmpty)
-                ++expandedRow; // Double row height
+            expandedRow += isRowEmpty ? expansionAmount : 1;
         }
 
         // Fixup column widths
-        int expandedCol = 0;
+        int64_t expandedCol = 0;
         for (int col = 0; col < mapWidth; ++col)
         {
             bool isExpanded = m_GalacticCol[col] == 0;
             m_GalacticCol[col] = expandedCol;
 
-            if (isExpanded)
-                ++expandedCol;
-            ++expandedCol;
+            expandedCol += isExpanded ? expansionAmount : 1;
         }
 
         // Fixup galaxy coordinates
