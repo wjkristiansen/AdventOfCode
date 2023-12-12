@@ -41,16 +41,35 @@ public:
 #endif
     }
 
+    int ListSolutions()
+    {
+        if (!m_handle)
+            return -1;
+
+        typedef void (*ListSolutionsFunc)();
+#ifdef _WIN32
+        ListSolutionsFunc listSolutions = reinterpret_cast<ListSolutionsFunc>(GetProcAddress(m_handle, "ListSolutions"));
+#else
+        ExecuteSolutionFunc executeChallenge = reinterpret_cast<ExecuteSolutionFunc>(dlsym(handle, "ListSolutions"));
+#endif
+        if (!listSolutions)
+            return -1;
+
+        listSolutions();
+
+        return 0;
+    }
+
     int Execute(int day, int part) const
     {
         if (!m_handle)
             return -1;
 
-        typedef void (*ExecuteChallengeFunc)(int day, int part);
+        typedef void (*ExecuteSolutionFunc)(int day, int part);
 #ifdef _WIN32
-        ExecuteChallengeFunc executeChallenge = reinterpret_cast<ExecuteChallengeFunc>(GetProcAddress(m_handle, "ExecuteChallenge"));
+        ExecuteSolutionFunc executeChallenge = reinterpret_cast<ExecuteSolutionFunc>(GetProcAddress(m_handle, "ExecuteSolution"));
 #else
-        ExecuteChallengeFunc executeChallenge = reinterpret_cast<ExecuteChallengeFunc>(dlsym(handle, "ExecuteChallenge"));
+        ExecuteSolutionFunc executeChallenge = reinterpret_cast<ExecuteSolutionFunc>(dlsym(handle, "ExecuteSolution"));
 #endif
         if (!executeChallenge)
             return -1;
@@ -68,16 +87,24 @@ int main(int argc, const char *argv[])
     InCommand::Int Day(0);
     InCommand::Int Part(0);
     InCommand::Bool ShowHelp;
-    CommandReader.DeclareSwitchOption(Year, "year", "Advent of Code Year", 'y');
-    CommandReader.DeclareSwitchOption(Day, "day", "Advent of Code Day", 'd');
-    CommandReader.DeclareSwitchOption(Part, "part", InCommand::Domain(1, 2), "Indicates which part of a day's challenge to run", 'p');
+    InCommand::Bool ListSolutions;
+    CommandReader.DeclareSwitchOption(Year, "year", "Advent of Code Year. Default to the latest year.", 'y');
+    CommandReader.DeclareSwitchOption(Day, "day", "Advent of Code Day.", 'd');
+    CommandReader.DeclareSwitchOption(Part, "part", InCommand::Domain(1, 2), "Indicates which part of a day's challenge to run (possibly ignored).", 'p');
     CommandReader.DeclareBoolSwitchOption(ShowHelp, "help", "Get help", 'h');
+    CommandReader.DeclareBoolSwitchOption(ListSolutions, "list", "Lists solutions for the given year.");
     CommandReader.ReadArguments(argc, argv);
 
     Runner runner;
 
     if(!runner.Load(Year))
         return -1;
+
+    if (ListSolutions)
+    {
+        runner.ListSolutions();
+        return 0;
+    }
 
     return runner.Execute(Day, Part);
 }

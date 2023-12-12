@@ -6,7 +6,7 @@
 #define DYNAMIC_EXPORT __attribute__((visibility("default")))
 #endif
 
-extern "C" DYNAMIC_EXPORT void ExecuteChallenge(int day, int part)
+extern "C" DYNAMIC_EXPORT void ExecuteSolution(int day, int part)
 {
     CSolutionFactory Factory;
     Factory.DeclareSolution<1>("Calorie Counting");

@@ -65,6 +65,14 @@ public:
         }
     }
 
+    void ListSolutions()
+    {
+        for (auto [day, alloc] : m_SolutionMap)
+        {
+            std::cout << day << ": " << alloc->GetTitle() << std::endl;
+        }
+    }
+
     void ExecuteSolution(int Day, int Part)
     {
         if(Day == 0)
