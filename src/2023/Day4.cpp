@@ -153,5 +153,5 @@ public:
     }
 };
 
-static CSolutionFactory::CSolutionAllocator<CSolution4> SolutionAllocator(4, "Scratchcards");
+DECLARE_SOLUTION(CSolution4, 4, "Scratchcards");
 

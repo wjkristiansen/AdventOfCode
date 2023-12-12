@@ -206,4 +206,4 @@ public:
     }
 };
 
-static CSolutionFactory::CSolutionAllocator<CSolution5> SolutionAllocator(5, "If You Give A Seed A Fertilizer");
+DECLARE_SOLUTION(CSolution5, 5, "If You Give A Seed A Fertilizer");

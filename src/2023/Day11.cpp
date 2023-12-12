@@ -97,4 +97,4 @@ public:
     }
 };
 
-static CSolutionFactory::CSolutionAllocator<CSolution11> SolutionAllocator(11, "Cosmic Expansion");
+DECLARE_SOLUTION(CSolution11, 11, "Cosmic Expansion");

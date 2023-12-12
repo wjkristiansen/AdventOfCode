@@ -158,4 +158,4 @@ public:
     }
 };
 
-static CSolutionFactory::CSolutionAllocator<CSolution7> SolutionAllocator(7, "Camel Cards");
+DECLARE_SOLUTION(CSolution7, 7, "Camel Cards");

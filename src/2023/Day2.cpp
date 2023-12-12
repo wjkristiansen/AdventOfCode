@@ -97,4 +97,4 @@ public:
     }
 };
 
-static CSolutionFactory::CSolutionAllocator<CSolution2> SolutionAllocator(2, "Cube Conundrum");
+DECLARE_SOLUTION(CSolution2, 2, "Cube Conundrum");

@@ -157,4 +157,4 @@ public:
     }
 };
 
-static CSolutionFactory::CSolutionAllocator<CSolution6> SolutionAllocator(6, "Wait For It");
+DECLARE_SOLUTION(CSolution6, 6, "Wait For It");

@@ -68,5 +68,5 @@ public:
     }
 };
 
-static CSolutionFactory::CSolutionAllocator<CSolution9> SolutionAllocator(9, "Mirage Maintenance");
+DECLARE_SOLUTION(CSolution9, 9, "Mirage Maintenance");
 

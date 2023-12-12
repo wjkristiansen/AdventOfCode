@@ -225,4 +225,4 @@ public:
     }
 };
 
-static CSolutionFactory::CSolutionAllocator<CSolution3> SolutionAllocator(3, "Gear Ratios");
+DECLARE_SOLUTION(CSolution3, 3, "Gear Ratios");

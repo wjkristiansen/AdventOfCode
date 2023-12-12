@@ -6,6 +6,9 @@
 
 #pragma once
 
+#define DECLARE_SOLUTION(Class, Day, Name) \
+    static CSolutionFactory::CSolutionAllocator<Class> SolutionAllocator(Day, Name)
+
 class CSolutionBase
 {
 public:

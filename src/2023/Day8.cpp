@@ -101,4 +101,4 @@ public:
     }
 };
 
-static CSolutionFactory::CSolutionAllocator<CSolution8> SolutionAllocator(8, "Haunted Wasteland");
+DECLARE_SOLUTION(CSolution8, 8, "Haunted Wasteland");

@@ -138,4 +138,4 @@ public:
     }
 };
 
-static CSolutionFactory::CSolutionAllocator<CSolution1> SolutionAllocator(1, "Trebuchet?!");
+DECLARE_SOLUTION(CSolution1, 1, "Trebuchet?!");

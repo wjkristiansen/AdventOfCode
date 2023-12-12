@@ -326,4 +326,4 @@ public:
     }
 };
 
-static CSolutionFactory::CSolutionAllocator<CSolution10> SolutionAllocator(10, "Pipe Maze");
+DECLARE_SOLUTION(CSolution10, 10, "Pipe Maze");
