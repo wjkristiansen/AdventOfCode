@@ -1,70 +1,75 @@
 #include "pch.h"
 #include "SolutionFactory.h"
 
-static constexpr size_t Priority(char c)
+class CSolution3: public CSolutionBase
 {
-    if(c >= 'a' && c <= 'z')
-        return 1 + size_t(c - 'a');
-    
-    if(c >= 'A' && c <= 'Z')
-        return 27 + size_t(c - 'A');
-    
-    return 0;
-}
-
-void CSolution<3>::Execute(int)
-{
-    std::ifstream fstream("Day3.txt");
-
-    size_t SumOfPriorities = 0;
-
-#if 0
-    for(;!fstream.eof();)
+    static constexpr size_t Priority(char c)
     {
-        std::string line;
-        std::getline(fstream, line);
-        if(line.empty())
-            break;
-
-        size_t NumItems = line.length();
-
-        // Find the one item that is in both compartments
-        for (size_t i = 0; i < NumItems / 2; ++i)
-        {
-            char c = line[i];
-            auto res = line.find(c, NumItems / 2);
-            if (res != std::string::npos)
-            {
-                auto P = Priority(c);
-                SumOfPriorities += P;
-                break;
-            }
-        }
+        if(c >= 'a' && c <= 'z')
+            return 1 + size_t(c - 'a');
+        
+        if(c >= 'A' && c <= 'Z')
+            return 27 + size_t(c - 'A');
+        
+        return 0;
     }
-#else
-    for (; !fstream.eof();)
-    {
-        std::vector<int> elfMasks(52, 0);
 
-        for (int mask = 1; mask < (1 << 3); mask = mask << 1)
+    void Execute(int)
+    {
+        std::ifstream fstream("2022/Day3.txt");
+
+        size_t SumOfPriorities = 0;
+
+    #if 0
+        for(;!fstream.eof();)
         {
             std::string line;
             std::getline(fstream, line);
+            if(line.empty())
+                break;
 
-            for (auto c : line)
+            size_t NumItems = line.length();
+
+            // Find the one item that is in both compartments
+            for (size_t i = 0; i < NumItems / 2; ++i)
             {
-                auto p = Priority(c);
-                elfMasks[p - 1] |= mask;
-
-                if (elfMasks[p - 1] == 0x7)
+                char c = line[i];
+                auto res = line.find(c, NumItems / 2);
+                if (res != std::string::npos)
                 {
-                    SumOfPriorities += p;
+                    auto P = Priority(c);
+                    SumOfPriorities += P;
                     break;
                 }
             }
         }
-    }
-#endif
+    #else
+        for (; !fstream.eof();)
+        {
+            std::vector<int> elfMasks(52, 0);
 
-    std::cout << "Sum of priorities = " << SumOfPriorities << std::endl;
-}
+            for (int mask = 1; mask < (1 << 3); mask = mask << 1)
+            {
+                std::string line;
+                std::getline(fstream, line);
+
+                for (auto c : line)
+                {
+                    auto p = Priority(c);
+                    elfMasks[p - 1] |= mask;
+
+                    if (elfMasks[p - 1] == 0x7)
+                    {
+                        SumOfPriorities += p;
+                        break;
+                    }
+                }
+            }
+        }
+    #endif
+
+        std::cout << "Sum of priorities = " << SumOfPriorities << std::endl;
+    }
+};
+
+DECLARE_SOLUTION(CSolution3, 3, "Rucksack Reorganization");

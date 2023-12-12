@@ -148,158 +148,161 @@ int ListNode::Compare(const NodeBase& o) const
 
     return 0;
 }
-
-
-void ReadNode(std::istream &stream, ListNode *pParent)
+class CSolution13: public CSolutionBase
 {
-    std::optional<int> Value;
-    char c;
-    for(stream >> c; !stream.eof(); stream >> c)
+    static void ReadNode(std::istream &stream, ListNode *pParent)
     {
-        switch(c)
+        std::optional<int> Value;
+        char c;
+        for(stream >> c; !stream.eof(); stream >> c)
         {
-        case '[': {
-            ListNode * pChild = new InnerListNode();
-            ReadNode(stream, pChild);
-            pParent->ChildNodes.emplace_back(pChild);
-            break; }
-
-        case ']':
-            if(Value.has_value())
+            switch(c)
             {
-                NodeBase *pChild = new IntNode(Value.value());
+            case '[': {
+                ListNode * pChild = new InnerListNode();
+                ReadNode(stream, pChild);
                 pParent->ChildNodes.emplace_back(pChild);
-            }
-            return;
+                break; }
 
-        case ',':
-            if (Value.has_value())
-            {
-                NodeBase *pChild = new IntNode(Value.value());
-                pParent->ChildNodes.emplace_back(pChild);
-            }
-            Value.reset();
-            break;
+            case ']':
+                if(Value.has_value())
+                {
+                    NodeBase *pChild = new IntNode(Value.value());
+                    pParent->ChildNodes.emplace_back(pChild);
+                }
+                return;
 
-        default:
-            if(Value.has_value())
-                Value = Value.value() * 10 + (c - '0');
-            else
-                Value = c - '0';
-            break;
+            case ',':
+                if (Value.has_value())
+                {
+                    NodeBase *pChild = new IntNode(Value.value());
+                    pParent->ChildNodes.emplace_back(pChild);
+                }
+                Value.reset();
+                break;
+
+            default:
+                if(Value.has_value())
+                    Value = Value.value() * 10 + (c - '0');
+                else
+                    Value = c - '0';
+                break;
+            }
         }
     }
-}
 
-struct Packet
-{
-    std::unique_ptr<NodeBase> Data;
-
-    Packet() = delete;
-    Packet(const Packet &) = delete;
-    Packet(Packet &&o) :
-        Data(std::move(o.Data))
+    struct Packet
     {
-    }
+        std::unique_ptr<NodeBase> Data;
 
-    Packet(const std::string &s)
+        Packet() = delete;
+        Packet(const Packet &) = delete;
+        Packet(Packet &&o) :
+            Data(std::move(o.Data))
+        {
+        }
+
+        Packet(const std::string &s)
+        {
+            std::istringstream ss(s);
+            auto pNode = new ListNode();
+            ReadNode(ss, pNode);
+            Data = std::unique_ptr<NodeBase>(pNode);
+        }
+
+        bool operator<(const Packet &o) const
+        {
+            return Data->Compare(*o.Data) < 0;
+        }
+
+        std::string ToString() const { return Data->ToString(); }
+    };
+
+    void Execute(int)
     {
-        std::istringstream ss(s);
-        auto pNode = new ListNode();
-        ReadNode(ss, pNode);
-        Data = std::unique_ptr<NodeBase>(pNode);
-    }
+        std::set<Packet> Packets;
+        std::ifstream fstream("Day13.txt"); 
 
-    bool operator<(const Packet &o) const
-    {
-        return Data->Compare(*o.Data) < 0;
-    }
+        for(;!fstream.eof();)
+        {
+            std::string line;
+            std::getline(fstream, line);
 
-    std::string ToString() const { return Data->ToString(); }
+            if(!line.empty())
+            {
+                Packets.emplace(line);
+            }
+        }
+
+        // Now add the "divider packets"
+        const std::string DividerPacketStrings[] =
+        {
+            "[[2]]",
+            "[[6]]"
+        };
+        Packets.emplace(DividerPacketStrings[0]);
+        Packets.emplace(DividerPacketStrings[1]);
+
+        size_t DividerPacketIndices[2];
+
+        // Dump the ordered packets
+        size_t Index = 1;
+        for(auto &Packet : Packets)
+        {
+            std::string s = Packet.ToString();
+
+            if (s == DividerPacketStrings[0])
+                DividerPacketIndices[0] = Index;
+
+            if (s == DividerPacketStrings[1])
+                DividerPacketIndices[1] = Index;
+
+            ++Index;
+
+            std::cout << Packet.ToString() << std::endl;
+        }
+
+        std::cout << "Divider key: " << DividerPacketIndices[0] * DividerPacketIndices[1] << std::endl;
+
+    #if 0
+        size_t SumOfRightOrder = 0;
+        size_t PairIndex = 1;
+        std::ifstream fstream("Day13.txt"); 
+        for(;!fstream.eof();)
+        {
+            ListNode first;
+            ListNode second;
+
+            std::string line;
+            std::getline(fstream, line);
+            {
+                std::istringstream sstream(line);
+                ReadNode(sstream, &first);
+            }
+            std::getline(fstream, line);
+            {
+                std::istringstream sstream(line);
+                ReadNode(sstream, &second);
+            }
+            std::getline(fstream, line);
+
+            int Compare = first.Compare(second);
+
+            if (Compare <= 0)
+            {
+                std::cout << "  Right order" << std::endl;
+                SumOfRightOrder += PairIndex;
+            }
+            else
+            {
+                std::cout << "  Wrong order" << std::endl;
+            }
+            PairIndex++;
+        }
+
+        std::cout << "Sum of right order: " << SumOfRightOrder << std::endl;
+    #endif
+    }
 };
 
-void CSolution<13>::Execute(int)
-{
-    std::set<Packet> Packets;
-    std::ifstream fstream("Day13.txt"); 
-
-    for(;!fstream.eof();)
-    {
-        std::string line;
-        std::getline(fstream, line);
-
-        if(!line.empty())
-        {
-            Packets.emplace(line);
-        }
-    }
-
-    // Now add the "divider packets"
-    const std::string DividerPacketStrings[] =
-    {
-        "[[2]]",
-        "[[6]]"
-    };
-    Packets.emplace(DividerPacketStrings[0]);
-    Packets.emplace(DividerPacketStrings[1]);
-
-    size_t DividerPacketIndices[2];
-
-    // Dump the ordered packets
-    size_t Index = 1;
-    for(auto &Packet : Packets)
-    {
-        std::string s = Packet.ToString();
-
-        if (s == DividerPacketStrings[0])
-            DividerPacketIndices[0] = Index;
-
-        if (s == DividerPacketStrings[1])
-            DividerPacketIndices[1] = Index;
-
-        ++Index;
-
-        std::cout << Packet.ToString() << std::endl;
-    }
-
-    std::cout << "Divider key: " << DividerPacketIndices[0] * DividerPacketIndices[1] << std::endl;
-
-#if 0
-    size_t SumOfRightOrder = 0;
-    size_t PairIndex = 1;
-    std::ifstream fstream("Day13.txt"); 
-    for(;!fstream.eof();)
-    {
-        ListNode first;
-        ListNode second;
-
-        std::string line;
-        std::getline(fstream, line);
-        {
-            std::istringstream sstream(line);
-            ReadNode(sstream, &first);
-        }
-        std::getline(fstream, line);
-        {
-            std::istringstream sstream(line);
-            ReadNode(sstream, &second);
-        }
-        std::getline(fstream, line);
-
-        int Compare = first.Compare(second);
-
-        if (Compare <= 0)
-        {
-            std::cout << "  Right order" << std::endl;
-            SumOfRightOrder += PairIndex;
-        }
-        else
-        {
-            std::cout << "  Wrong order" << std::endl;
-        }
-        PairIndex++;
-    }
-
-    std::cout << "Sum of right order: " << SumOfRightOrder << std::endl;
-#endif
-}
+DECLARE_SOLUTION(CSolution13, 13, "Distress Signal");

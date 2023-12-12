@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "SolutionFactory.h"
 
-const char *TestInitStacks[] =
+static const char* TestInitStacks[] =
 {
     "ZN",
     "MCD",
@@ -17,7 +17,7 @@ const char *TestInitStacks[] =
 // [B] [Q] [D] [T] [T] [B] [N] [L] [D]
 // [H] [M] [N] [Z] [M] [C] [M] [P] [P]
 //  1   2   3   4   5   6   7   8   9 
-const char *InitStacks[] =
+static const char* InitStacks[] =
 {
     "HBVWNMLP",
     "MQH",
@@ -30,49 +30,54 @@ const char *InitStacks[] =
     "PDBCN"
 };
 
-void CSolution<5>::Execute(int)
+class CSolution5: public CSolutionBase
 {
-    std::ifstream fstream("Day5.txt"); 
-
-    std::vector<std::vector<char>> Stacks;
-    for (const char* crates : InitStacks)
+    void Execute(int)
     {
-        Stacks.emplace_back();
-        auto &stack = Stacks.back();
+        std::ifstream fstream("2022/Day5.txt"); 
 
-        for (const char* c = crates; *c; ++c)
+        std::vector<std::vector<char>> Stacks;
+        for (const char* crates : InitStacks)
         {
-            stack.push_back(*c);
+            Stacks.emplace_back();
+            auto &stack = Stacks.back();
+
+            for (const char* c = crates; *c; ++c)
+            {
+                stack.push_back(*c);
+            }
+        }
+
+        for(;!fstream.eof();)
+        {
+            std::string line;
+            std::getline(fstream, line);
+
+            std::istringstream ss(line);
+            std::string word;
+            size_t count;
+            size_t source;
+            size_t dest;
+            ss >> word;
+            ss >> count;
+            ss >> word;
+            ss >> source;
+            ss >> word;
+            ss >> dest;
+            std::cout << count << ", " << source << ", " << dest << std::endl;
+            source--;
+            dest--;
+            auto& SourceStack = Stacks[source];
+            auto& DestStack = Stacks[dest];
+            DestStack.insert(DestStack.end(), SourceStack.end() - count, SourceStack.end());
+            SourceStack.erase(SourceStack.end() - count, SourceStack.end());
+        }
+
+        for (auto& stack : Stacks)
+        {
+            std::cout << stack.back();
         }
     }
+};
 
-    for(;!fstream.eof();)
-    {
-        std::string line;
-        std::getline(fstream, line);
-
-        std::istringstream ss(line);
-        std::string word;
-        size_t count;
-        size_t source;
-        size_t dest;
-        ss >> word;
-        ss >> count;
-        ss >> word;
-        ss >> source;
-        ss >> word;
-        ss >> dest;
-        std::cout << count << ", " << source << ", " << dest << std::endl;
-        source--;
-        dest--;
-        auto& SourceStack = Stacks[source];
-        auto& DestStack = Stacks[dest];
-        DestStack.insert(DestStack.end(), SourceStack.end() - count, SourceStack.end());
-        SourceStack.erase(SourceStack.end() - count, SourceStack.end());
-    }
-
-    for (auto& stack : Stacks)
-    {
-        std::cout << stack.back();
-    }
-}
+DECLARE_SOLUTION(CSolution5, 5, "Supply Stacks");
