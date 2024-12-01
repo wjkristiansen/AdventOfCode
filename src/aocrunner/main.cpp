@@ -83,7 +83,7 @@ public:
 int main(int argc, const char *argv[])
 {
     InCommand::CCommandReader CommandReader("aocrunner", "Advent of Code Runner");
-    InCommand::Int Year(2023);
+    InCommand::Int Year(2024);
     InCommand::Int Day(0);
     InCommand::Int Part(0);
     InCommand::Bool ShowHelp;
