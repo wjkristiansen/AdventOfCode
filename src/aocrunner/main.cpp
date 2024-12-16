@@ -97,7 +97,11 @@ int main(int argc, const char *argv[])
 
     Runner runner;
 
-    if(!runner.Load(Year))
+    SetConsoleOutputCP(CP_UTF8);
+    
+    SetConsoleCP(CP_UTF8);
+
+    if (!runner.Load(Year))
         return -1;
 
     if (ListSolutions)
