@@ -91,77 +91,71 @@ public:
 
     virtual void Execute(int part)
     {
-        int minPart = part > 0 ? part : 1;
-        int maxPart = part > 0 ? part : 2;
-        for (int runPart = minPart; runPart <= maxPart; ++runPart)
+        m_AntennaGrid.clear();
+        m_AntinodeGrid.clear();
+        m_AntennaMap.clear();
+        m_UniqueAntinodes = 0;
+
+        if (part == 1)
         {
-            m_AntennaGrid.clear();
-            m_AntinodeGrid.clear();
-            m_AntennaMap.clear();
-            m_UniqueAntinodes = 0;
-            
-            if (runPart == 1)
-            {
-                ReadAntennaGrid();
-                PrintGrid(m_AntennaGrid);
-                PrintGrid(m_AntinodeGrid);
-                BuildAntennaMap();
-                PrintAntennaMap();
+            ReadAntennaGrid();
+            PrintGrid(m_AntennaGrid);
+            PrintGrid(m_AntinodeGrid);
+            BuildAntennaMap();
+            PrintAntennaMap();
 
-                // For each type of antenna
-                for (const auto& antennaEntry : m_AntennaMap)
+            // For each type of antenna
+            for (const auto& antennaEntry : m_AntennaMap)
+            {
+                // Iterate over all unique pairs of locations
+                for (int a = 0; a < antennaEntry.second.size(); ++a)
                 {
-                    // Iterate over all unique pairs of locations
-                    for (int a = 0; a < antennaEntry.second.size(); ++a)
+                    for (int b = a + 1; b < antennaEntry.second.size(); ++b)
                     {
-                        for (int b = a + 1; b < antennaEntry.second.size(); ++b)
+                        const LocationType &pos1 = antennaEntry.second[a];
+                        const LocationType& pos2 = antennaEntry.second[b];
+                        std::pair<int, int> delta(pos2.first - pos1.first, pos2.second - pos1.second);
+                        LocationType antiPos1(pos1.first - delta.first, pos1.second - delta.second);
+                        LocationType antiPos2(pos2.first + delta.first, pos2.second + delta.second);
+                        SetAntinode(antiPos1);
+                        SetAntinode(antiPos2);
+                    }
+                }
+            }
+
+            std::cout << "Part 1: Unique Antinode Locations: " << m_UniqueAntinodes << std::endl;
+        }
+        else
+        {
+            ReadAntennaGrid();
+            BuildAntennaMap();
+
+            // For each type of antenna
+            for (const auto& antennaEntry : m_AntennaMap)
+            {
+                // Iterate over all unique pairs of locations
+                for (int a = 0; a < antennaEntry.second.size(); ++a)
+                {
+                    for (int b = a + 1; b < antennaEntry.second.size(); ++b)
+                    {
+                        LocationType pos1 = antennaEntry.second[a];
+                        LocationType pos2 = antennaEntry.second[b];
+                        std::pair<int, int> delta(pos2.first - pos1.first, pos2.second - pos1.second);
+
+                        // Place antinodes at and "behind" pos1
+                        for (; SetAntinode(pos1); pos1.first -= delta.first, pos1.second -= delta.second)
                         {
-                            const LocationType &pos1 = antennaEntry.second[a];
-                            const LocationType& pos2 = antennaEntry.second[b];
-                            std::pair<int, int> delta(pos2.first - pos1.first, pos2.second - pos1.second);
-                            LocationType antiPos1(pos1.first - delta.first, pos1.second - delta.second);
-                            LocationType antiPos2(pos2.first + delta.first, pos2.second + delta.second);
-                            SetAntinode(antiPos1);
-                            SetAntinode(antiPos2);
+                        }
+                        
+                        // Place antinodes at and "ahead of" pos2
+                        for (; SetAntinode(pos2); pos2.first += delta.first, pos2.second += delta.second)
+                        {
                         }
                     }
                 }
-
-                std::cout << "Part 1: Unique Antinode Locations: " << m_UniqueAntinodes << std::endl;
             }
-            else
-            {
-                ReadAntennaGrid();
-                BuildAntennaMap();
 
-                // For each type of antenna
-                for (const auto& antennaEntry : m_AntennaMap)
-                {
-                    // Iterate over all unique pairs of locations
-                    for (int a = 0; a < antennaEntry.second.size(); ++a)
-                    {
-                        for (int b = a + 1; b < antennaEntry.second.size(); ++b)
-                        {
-                            LocationType pos1 = antennaEntry.second[a];
-                            LocationType pos2 = antennaEntry.second[b];
-                            std::pair<int, int> delta(pos2.first - pos1.first, pos2.second - pos1.second);
-
-                            // Place antinodes at and "behind" pos1
-                            for (; SetAntinode(pos1); pos1.first -= delta.first, pos1.second -= delta.second)
-                            {
-                            }
-                            
-                            // Place antinodes at and "ahead of" pos2
-                            for (; SetAntinode(pos2); pos2.first += delta.first, pos2.second += delta.second)
-                            {
-                            }
-                        }
-                    }
-                }
-
-                std::cout << "Part 2: Unique Antinode Locations: " << m_UniqueAntinodes << std::endl;
-                assert(runPart == 2);
-            }
+            std::cout << "Part 2: Unique Antinode Locations: " << m_UniqueAntinodes << std::endl;
         }
     }
 };

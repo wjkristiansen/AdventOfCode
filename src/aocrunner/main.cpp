@@ -85,12 +85,19 @@ int main(int argc, const char *argv[])
     InCommand::CCommandReader CommandReader("aocrunner", "Advent of Code Runner");
     InCommand::Int Year(2024);
     InCommand::Int Day(0);
-    InCommand::Int Part(0);
+    InCommand::String PartString("1");
     InCommand::Bool ShowHelp;
     InCommand::Bool ListSolutions;
     CommandReader.DeclareSwitchOption(Year, "year", "Advent of Code Year. Default to the latest year.", 'y');
     CommandReader.DeclareSwitchOption(Day, "day", "Advent of Code Day.", 'd');
-    CommandReader.DeclareSwitchOption(Part, "part", InCommand::Domain(1, 2), "Indicates which part of a day's challenge to run (possibly ignored).", 'p');
+    std::string partDomainValues[] =
+    {
+        std::string("1"),
+        std::string("2"),
+        std::string("All"),
+    };
+    
+    CommandReader.DeclareSwitchOption(PartString, "part", InCommand::Domain(3, partDomainValues), "Indicates which part of a day's challenge to run (possibly ignored).", 'p');
     CommandReader.DeclareBoolSwitchOption(ShowHelp, "help", "Get help", 'h');
     CommandReader.DeclareBoolSwitchOption(ListSolutions, "list", "Lists solutions for the given year.");
     CommandReader.ReadArguments(argc, argv);
@@ -110,5 +117,20 @@ int main(int argc, const char *argv[])
         return 0;
     }
 
-    return runner.Execute(Day, Part);
+    int minPart = 1;
+    int maxPart = 2;
+
+    if (PartString.Value() == "1")
+        maxPart = 1;
+    else if (PartString.Value() == "2")
+        minPart = 2;
+
+    for (int Part = minPart; Part <= maxPart; ++Part)
+    {
+        int result = runner.Execute(Day, Part);
+        if (result != 0)
+            return result;
+    }
+
+    return 0;
 }

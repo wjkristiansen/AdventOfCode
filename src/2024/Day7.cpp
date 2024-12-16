@@ -72,61 +72,56 @@ public:
 
     virtual void Execute(int part)
     {
-        int minPart = part > 0 ? part : 1;
-        int maxPart = part > 0 ? part : 2;
-        for (int runPart = minPart; runPart <= maxPart; ++runPart)
+        if (part == 1)
         {
-            if (runPart == 1)
+            std::ifstream fstream("2024/Day7.txt");
+            size_t sum = 0;
+            for (int i = 0;!fstream.eof();++i)
             {
-                std::ifstream fstream("2024/Day7.txt");
-                size_t sum = 0;
-                for (int i = 0;!fstream.eof();++i)
+                std::string line;
+                std::getline(fstream, line);
+                std::istringstream ss(line);
+
+                size_t output;
+                std::vector<size_t> inputs;
+
+                ss >> output;
+                ss.ignore(1, ':');
+                ss.ignore(1, ' ');
+                std::string operandString;
+                while (std::getline(ss, operandString, ' '))
                 {
-                    std::string line;
-                    std::getline(fstream, line);
-                    std::istringstream ss(line);
-
-                    size_t output;
-                    std::vector<size_t> inputs;
-
-                    ss >> output;
-                    ss.ignore(1, ':');
-                    ss.ignore(1, ' ');
-                    std::string operandString;
-                    while (std::getline(ss, operandString, ' '))
-                    {
-                        inputs.push_back(std::stoi(operandString));
-                    }
+                    inputs.push_back(std::stoi(operandString));
                 }
-                std::cout << "Part 1: Sum: " << sum << std::endl;
             }
-            else
+            std::cout << "Part 1: Sum: " << sum << std::endl;
+        }
+        else
+        {
+            std::ifstream fstream("2024/Day7.txt");
+            size_t sum = 0;
+            for (int i = 0;!fstream.eof();++i)
             {
-                std::ifstream fstream("2024/Day7.txt");
-                size_t sum = 0;
-                for (int i = 0;!fstream.eof();++i)
+                std::string line;
+                std::getline(fstream, line);
+                std::istringstream ss(line);
+
+                size_t output;
+                std::vector<size_t> inputs;
+
+                ss >> output;
+                ss.ignore(1, ':');
+                ss.ignore(1, ' ');
+                std::string operandString;
+                while (std::getline(ss, operandString, ' '))
                 {
-                    std::string line;
-                    std::getline(fstream, line);
-                    std::istringstream ss(line);
-
-                    size_t output;
-                    std::vector<size_t> inputs;
-
-                    ss >> output;
-                    ss.ignore(1, ':');
-                    ss.ignore(1, ' ');
-                    std::string operandString;
-                    while (std::getline(ss, operandString, ' '))
-                    {
-                        inputs.push_back(std::stoi(operandString));
-                    }
-
-                    if (FindEquation(output, 0, Operation::Add, inputs.begin(), inputs.end()))
-                        sum += output;
+                    inputs.push_back(std::stoi(operandString));
                 }
-                std::cout << "Part 2: Sum: " << sum << std::endl;
+
+                if (FindEquation(output, 0, Operation::Add, inputs.begin(), inputs.end()))
+                    sum += output;
             }
+            std::cout << "Part 2: Sum: " << sum << std::endl;
         }
     }
 };

@@ -174,60 +174,55 @@ public:
 
     virtual void Execute(int part)
     {
-        int minPart = part > 0 ? part : 1;
-        int maxPart = part > 0 ? part : 2;
-        for (int runPart = minPart; runPart <= maxPart; ++runPart)
+        if (part == 1)
         {
-            if (runPart == 1)
+            m_Grid.clear();
+            m_GuardDir = Direction::North;
+            m_VisitedPositions = 1;
+            m_GuardPos = ReadGrid(m_Grid);
+
+            // Print the grid for brevity
+            PrintGrid(m_Grid, m_GuardPos);
+
+            RunSteps();
+
+            // Print the updated map with marks for brevity
+            PrintGrid(m_Grid, m_GuardPos);
+
+            std::cout << "Part 1: Unique positions: " << m_VisitedPositions << std::endl;
+        }
+        else
+        {
+            GridType origGrid;
+            PositionType origPos = ReadGrid(origGrid);
+            size_t limit = origGrid.size() * origGrid.size();
+
+            PrintGrid(origGrid, origPos);
+
+            for (size_t addObstRow = 0; addObstRow < origGrid.size(); ++addObstRow)
             {
-                m_Grid.clear();
-                m_GuardDir = Direction::North;
-                m_VisitedPositions = 1;
-                m_GuardPos = ReadGrid(m_Grid);
-
-                // Print the grid for brevity
-                PrintGrid(m_Grid, m_GuardPos);
-
-                RunSteps();
-
-                // Print the updated map with marks for brevity
-                PrintGrid(m_Grid, m_GuardPos);
-
-                std::cout << "Part 1: Unique positions: " << m_VisitedPositions << std::endl;
-            }
-            else
-            {
-                GridType origGrid;
-                PositionType origPos = ReadGrid(origGrid);
-                size_t limit = origGrid.size() * origGrid.size();
-
-                PrintGrid(origGrid, origPos);
-
-                for (size_t addObstRow = 0; addObstRow < origGrid.size(); ++addObstRow)
+                for (size_t addObstCol = 0; addObstCol < origGrid[addObstRow].size(); ++addObstCol)
                 {
-                    for (size_t addObstCol = 0; addObstCol < origGrid[addObstRow].size(); ++addObstCol)
+                    // Only run simulation with new obstacles
+                    if (origGrid[addObstRow][addObstCol] != '#')
                     {
-                        // Only run simulation with new obstacles
-                        if (origGrid[addObstRow][addObstCol] != '#')
+                        m_Grid = origGrid;
+                        m_Grid[addObstRow][addObstCol] = '#'; // Add new obstacle
+                        m_GuardPos = origPos;
+                        m_GuardDir = Direction::North;
+                        m_VisitedPositions = 1;
+
+                        auto result = RunSteps();
+
+                        if (StepResult::Infinite == result)
                         {
-                            m_Grid = origGrid;
-                            m_Grid[addObstRow][addObstCol] = '#'; // Add new obstacle
-                            m_GuardPos = origPos;
-                            m_GuardDir = Direction::North;
-                            m_VisitedPositions = 1;
-
-                            auto result = RunSteps();
-
-                            if (StepResult::Infinite == result)
-                            {
-                                m_InfiniteResultCount++;
-                            }
+                            m_InfiniteResultCount++;
                         }
                     }
                 }
-
-                std::cout << "Part 2: Infinite Result Count: " << m_InfiniteResultCount << std::endl;
             }
+
+            std::cout << "Part 2: Infinite Result Count: " << m_InfiniteResultCount << std::endl;
         }
     }
 };
