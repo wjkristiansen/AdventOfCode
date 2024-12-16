@@ -110,6 +110,45 @@ public:
         }
     }
 
+    void Defrag2()
+    {
+        auto backIt = m_BlockRuns.end();
+        backIt = std::prev(backIt);
+        for (auto it = m_BlockRuns.begin(); it != m_BlockRuns.end();)
+        {
+            auto itNext = std::next(it);
+            if (itNext == m_BlockRuns.end())
+                break;
+
+            size_t gapSize = itNext->Offset - (it->Offset + it->Length);
+            if (backIt->Length <= gapSize)
+            {
+                // Move the file
+                backIt->Offset = it->Offset + it->Length;
+                m_BlockRuns.insert(itNext, *backIt);
+                auto eraseIt = backIt;
+                backIt = std::prev(backIt);
+                m_BlockRuns.erase(eraseIt);
+
+                // Reset the forward iterator to the start of the list
+                it = m_BlockRuns.begin();
+
+                // PrintDiskContents();
+            }
+            else
+            {
+                ++it;
+                if (it == backIt)
+                {
+                    it = m_BlockRuns.begin();
+                    backIt = std::prev(backIt);
+                    if (backIt == it)
+                        break;
+                }
+            }
+        }
+    }
+
     size_t Checksum()
     {
         size_t checksum = 0;
@@ -135,6 +174,11 @@ public:
         }
         else
         {
+            ReadInput();
+            // PrintDiskContents();
+            Defrag2();
+            size_t checksum = Checksum();
+            std::cout << "Part 2: Checksum: " << checksum << std::endl;
         }
     }
 };
