@@ -20,4 +20,6 @@
 #include <numeric>
 #include <bitset>
 
+#include "Grid.h"
+
 #include <assert.h>
