@@ -8,8 +8,8 @@ public:
     {
     }
 
-    DecimalGrid<int> m_Grid;
-    DecimalGrid<int> m_MaskGrid;
+    DecimalDigitGrid<int> m_Grid;
+    Grid<int> m_MaskGrid;
 
     int RecursivePathSearch(size_t row, size_t col, int value)
     {
@@ -110,7 +110,7 @@ public:
                 for (size_t col = 0; col < m_Grid.Width(); ++col)
                 {
                     // Reset the mask grid
-                    m_MaskGrid = DecimalGrid<int>(m_Grid.Height(), m_Grid.Width(), -1);
+                    m_MaskGrid = Grid<int>(m_Grid.Height(), m_Grid.Width(), -1);
 
                     if (m_Grid.Data()[row][col] == 0)
                     {
