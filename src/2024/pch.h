@@ -19,6 +19,7 @@
 #include <regex>
 #include <numeric>
 #include <bitset>
+#include <stack>
 
 #include "Grid.h"
 
