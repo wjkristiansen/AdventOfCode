@@ -133,18 +133,19 @@ public:
                 continue;
 
             std::pair<int64_t, int64_t> result;
+
+            if (part == 2)
+            {
+                m_Eq1.C += 10000000000000LL;
+                m_Eq2.C += 10000000000000LL;
+            }
+
             if (SolveSimEquation(m_Eq1, m_Eq2, result))
             {
                 cost += 3 * result.first + result.second;
-                std::cout << "Button A: " << result.first << std::endl;
-                std::cout << "Button B: " << result.second << std::endl;
             }
-            else
-            {
-                std::cout << "No Solution" << std::endl;
-            }
-            std::cout << std::endl;
         }
+        
         std::cout << "Total Cost: " << cost << std::endl;
     }
 };
