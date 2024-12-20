@@ -129,11 +129,47 @@ public:
 
         PrintBots();
 
-        MoveBots(100);
+        if (part == 1)
+        {
+            MoveBots(100);
+                
+            PrintGrid();
+                
+            std::cout << "Safety Factor: " << SafetyFactor() << std::endl;
+        }
+        else
+        {
+            for (int i = 0;; ++i)
+            {
+                MoveBots(1);
+                std::cout << "Count: " << i + 1 << std::endl;
 
-        PrintGrid();
+                std::string emptyRow = std::string(GridWidth, '.');
+                std::vector<std::string> imageRows(GridHeight, emptyRow);
+                bool possibleTree = false;
+                for (auto& bot : m_Bots)
+                {
+                    imageRows[bot.Position.second][bot.Position.first] = 'X';
 
-        std::cout << "Safety Factor: " << SafetyFactor() << std::endl;
+                    if (imageRows[bot.Position.second].find("XXXXXX") != std::string::npos)
+                    {
+                        possibleTree = true;
+                    }
+                }
+
+                if (possibleTree)
+                {
+                    for (auto& row : imageRows)
+                    {
+                        std::cout << row << std::endl;
+                    }
+                    auto key = std::cin.get();
+                    if (key == 'q' || key == 'Q')
+                        break;
+                }
+            }
+        }
+
     }
 };
 
