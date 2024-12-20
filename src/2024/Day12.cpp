@@ -41,7 +41,7 @@ public:
             m_NumSides += NumEdgeStarts(row, col);
 
             // Mark the associated mask location
-            m_Mask.SetValue(1, row, col);
+            m_Mask.SetValue(row, col, 1);
             ++regionSize;
 
             plotStack.push(std::pair(row - 1, col));

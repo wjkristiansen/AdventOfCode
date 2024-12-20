@@ -51,7 +51,7 @@ public:
         }
 
         // Mark location as searched
-        m_MaskGrid.SetValue(value, row, col);
+        m_MaskGrid.SetValue(row, col, value);
 
         return result;
     }

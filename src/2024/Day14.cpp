@@ -74,7 +74,7 @@ public:
         for (auto& bot : m_Bots)
         {
              if (grid.GetValue(bot.Position.second, bot.Position.first) == '.')
-                grid.SetValue('1', bot.Position.second, bot.Position.first);
+                grid.SetValue(bot.Position.second, bot.Position.first, '1');
             else
                 grid.Data()[bot.Position.second][bot.Position.first]++;
         }

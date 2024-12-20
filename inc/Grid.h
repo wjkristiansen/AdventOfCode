@@ -31,7 +31,7 @@ public:
 
     size_t Width() const { return m_Data.front().size(); }
     size_t Height() const { return m_Data.size(); }
-    void SetValue(_ValueType v, size_t row, size_t col)
+    void SetValue(size_t row, size_t col, _ValueType v)
     {
         if (row >= Height() || col >= Width())
             throw(std::exception());
