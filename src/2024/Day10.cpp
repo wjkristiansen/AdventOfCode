@@ -99,7 +99,8 @@ public:
     {
         if (part == 1)
         {
-            m_Grid.ReadDenseSingleDigitsFromFile("2024/Day10.txt");
+            std::ifstream fstream("2024/Day10.txt");
+            m_Grid.ReadDenseSingleDigitsFromStream(fstream);
             m_Grid.Print();
             std::cout << std::endl;
             int trailSum = 0;
@@ -125,7 +126,8 @@ public:
         }
         else
         {
-            m_Grid.ReadDenseSingleDigitsFromFile("2024/Day10.txt");
+            std::ifstream fstream("2024/Day10.txt");
+            m_Grid.ReadDenseSingleDigitsFromStream(fstream);
             m_Grid.Print();
             std::cout << std::endl;
             int trailSum = 0;

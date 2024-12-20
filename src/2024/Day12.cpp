@@ -116,7 +116,8 @@ public:
     {
         if (part == 1)
         {
-            m_Grid.ReadFromFile("2024/Day12.txt");
+            std::ifstream fstream("2024/Day12.txt");
+            m_Grid.ReadFromStream(fstream);
             m_Mask = Grid<int>(m_Grid.Width(), m_Grid.Height(), 0);
             m_Grid.Print();
             std::cout << std::endl;
@@ -139,7 +140,8 @@ public:
         }
         else
         {
-            m_Grid.ReadFromFile("2024/Day12.txt");
+            std::ifstream fstream("2024/Day12.txt");
+            m_Grid.ReadFromStream(fstream);
             m_Mask = Grid<int>(m_Grid.Width(), m_Grid.Height(), 0);
             m_Grid.Print();
             std::cout << std::endl;

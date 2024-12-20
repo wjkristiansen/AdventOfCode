@@ -72,13 +72,12 @@ public:
         Grid<_ValueType>(width, height, initValue) {
     }
 
-    void ReadDenseSingleDigitsFromFile(const char* fileName)
+    void ReadDenseSingleDigitsFromStream(std::istream &stream)
     {
-        std::ifstream fstream(fileName);
-        while (!fstream.eof())
+        while (!stream.eof())
         {
             std::string line;
-            std::getline(fstream, line);
+            std::getline(stream, line);
             if (line.empty())
                 break;
 
@@ -99,13 +98,13 @@ public:
     AsciiGrid() = default;
     AsciiGrid(size_t width, size_t height, char initValue) :
         Grid(width, height, initValue) {}
-    void ReadFromFile(const char* fileName)
+
+    void ReadFromStream(std::istream& stream)
     {
-        std::ifstream fstream(fileName);
-        while (!fstream.eof())
+        while (!stream.eof())
         {
             std::string line;
-            std::getline(fstream, line);
+            std::getline(stream, line);
             if (line.empty())
                 break;
 
