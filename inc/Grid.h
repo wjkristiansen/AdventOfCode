@@ -69,7 +69,7 @@ class DecimalDigitGrid : public Grid<_ValueType>
 public:
     DecimalDigitGrid() = default;
     DecimalDigitGrid(size_t width, size_t height, _ValueType initValue) :
-        Grid(width, height, initValue) {
+        Grid<_ValueType>(width, height, initValue) {
     }
 
     void ReadDenseSingleDigitsFromFile(const char* fileName)

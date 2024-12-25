@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <unistd.h>
 
 class Runner
 {
@@ -17,18 +18,37 @@ public:
         Unload();
 
         std::ostringstream filename;
-        filename << "aoc" << year;
+        filename << "./aoc" << year;
 
 #ifdef _WIN32
         filename << ".dll";
         m_handle = LoadLibrary(filename.str().c_str());
-#else
-        filename << ".so";
-        m_handle = dlopen(filename.str().c_str(), RTLD_LAZY);
-#endif
+
         if (!m_handle)
             return false;
+#else
+        char buffer[512];
+        
+        // Get the current working directory
+        if (getcwd(buffer, sizeof(buffer)) != nullptr)
+        {
+            std::cout << "Current working directory: " << buffer << std::endl;
+        }
+        else
+        {
+            std::cerr << "Error getting current working directory" << std::endl;
+        }
 
+        filename << ".so";
+
+        m_handle = dlopen(filename.str().c_str(), RTLD_LAZY);
+        if (!m_handle)
+        {
+            std::cerr << "Failed to load library: " << dlerror() << std::endl;
+            return false;
+        }
+#endif
+    
         return true;
     }
 
@@ -37,7 +57,8 @@ public:
 #ifdef _WIN32
         FreeLibrary(m_handle);
 #else
-        dlclose(m_handle);
+        if(m_handle)
+            dlclose(m_handle);
 #endif
     }
 
@@ -50,7 +71,7 @@ public:
 #ifdef _WIN32
         ListSolutionsFunc listSolutions = reinterpret_cast<ListSolutionsFunc>(GetProcAddress(m_handle, "ListSolutions"));
 #else
-        ExecuteSolutionFunc executeChallenge = reinterpret_cast<ExecuteSolutionFunc>(dlsym(handle, "ListSolutions"));
+        ListSolutionsFunc listSolutions = reinterpret_cast<ListSolutionsFunc>(dlsym(m_handle, "ListSolutions"));
 #endif
         if (!listSolutions)
             return -1;
@@ -69,7 +90,7 @@ public:
 #ifdef _WIN32
         ExecuteSolutionFunc executeChallenge = reinterpret_cast<ExecuteSolutionFunc>(GetProcAddress(m_handle, "ExecuteSolution"));
 #else
-        ExecuteSolutionFunc executeChallenge = reinterpret_cast<ExecuteSolutionFunc>(dlsym(handle, "ExecuteSolution"));
+        ExecuteSolutionFunc executeChallenge = reinterpret_cast<ExecuteSolutionFunc>(dlsym(m_handle, "ExecuteSolution"));
 #endif
         if (!executeChallenge)
             return -1;
@@ -104,9 +125,10 @@ int main(int argc, const char *argv[])
 
     Runner runner;
 
+#ifdef _WIN32
     SetConsoleOutputCP(CP_UTF8);
-    
     SetConsoleCP(CP_UTF8);
+#endif
 
     if (!runner.Load(Year))
         return -1;

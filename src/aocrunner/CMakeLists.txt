@@ -8,6 +8,13 @@ target_link_libraries(
         InCommandLib
 )
 
+if(NOT MSVC)
+    target_link_libraries(
+        aocrunner
+            dl
+    )
+endif()
+
 if(MSVC)
     target_compile_options(aocrunner PRIVATE /W4 /WX)
 else()

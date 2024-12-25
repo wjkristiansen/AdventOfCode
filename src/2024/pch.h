@@ -20,6 +20,7 @@
 #include <numeric>
 #include <bitset>
 #include <stack>
+#include <list>
 
 #include "Grid.h"
 

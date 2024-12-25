@@ -16,8 +16,10 @@
 #include <unordered_set>
 #include <vector>
 #include <limits>
+#include <climits>
 #include <regex>
 #include <numeric>
 #include <bitset>
+#include <cmath>
 
 #include <assert.h>

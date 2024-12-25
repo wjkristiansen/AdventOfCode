@@ -21,4 +21,9 @@ target_precompile_headers(aoc2024
     PRIVATE
         "pch.h")
 
-set_target_properties(aoc2024 PROPERTIES LINK_FLAGS "${LINK_FLAGS} /NOIMPLIB")
+if(MSVC)
+    set_target_properties(aoc2024 PROPERTIES LINK_FLAGS "${LINK_FLAGS} /NOIMPLIB")
+else()
+    # Prevent CMake from prepending "lib"
+    set(CMAKE_SHARED_LIBRARY_PREFIX "")
+endif()
