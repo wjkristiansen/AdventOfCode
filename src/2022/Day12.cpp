@@ -16,14 +16,6 @@ class CSolution12: public CSolutionBase
         size_t NeighborIndex(size_t i) const { return NeighborIndices[i]; }
     };
 
-    struct CostFunc
-    {
-        size_t operator()(const HeightMapNode &, const HeightMapNode &)
-        {
-            return 1;
-        }
-    };
-
     void Execute(int)
     {
         std::ifstream fstream("2022/Day12.txt");
@@ -102,15 +94,14 @@ class CSolution12: public CSolutionBase
                 Node.NeighborIndices.push_back(NeighborIndex);
         }
 
-        Dijkstras dijkstras(HeightMapNodes.size());
-        size_t steps = dijkstras.Execute<HeightMapNode, CostFunc>(HeightMapNodes, StartIndex, EndIndex);
+        size_t steps = Dijkstras::Execute<HeightMapNode>(HeightMapNodes, StartIndex, EndIndex);
 
         std::cout << "Steps: " << steps << std::endl;
 
         size_t MinSteps = std::numeric_limits<size_t>::max();
         for(auto Start : PotentialStartPoints)
         {
-            steps = dijkstras.Execute<HeightMapNode, CostFunc>(HeightMapNodes, Start, EndIndex);
+            steps = Dijkstras::Execute<HeightMapNode>(HeightMapNodes, Start, EndIndex);
             if(steps < MinSteps)
                 MinSteps = steps;
         }

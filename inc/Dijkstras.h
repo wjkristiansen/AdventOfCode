@@ -7,9 +7,6 @@ class Dijkstras
 {
     static const auto MaxCost = std::numeric_limits<size_t>::max();
 
-    std::vector<bool> m_Visited;
-    std::vector<size_t> m_Costs;
-
     struct Edge
     {
         size_t Cost;
@@ -29,25 +26,46 @@ class Dijkstras
     };
 
 public:
-    Dijkstras(size_t NumNodes) :
-        m_Visited(NumNodes),
-        m_Costs(NumNodes) {}
+    template<class NodeType>
+    struct DefaultEdgeCost
+    {
+        size_t operator()(const std::vector<NodeType>&, size_t, size_t)
+        {
+            // By default, assume the cost traversing to any neighbor
+            // has a cost of 1.
+            return 1;
+        }
+    };
+
+    template<class NodeType>
+    struct DefaultUpdatePredecessor
+    {
+        void operator()(std::vector<NodeType>&, size_t, size_t)
+        {
+            // Do nothing by default
+        }
+    };
 
     // Templatized Execute function requires that `NodeType` implement the following:
     // size_t NumNeighbors()
     // size_t NeighborIndex(size_t i) // Where `i` is in the range `[0, NumNeighbors())`
     //
-    // In addition, the functor EdgeCostFunc must implement:
-    // operator()(const NodeType &node, const NodeType &neighbor)
-    // Where `neighbor` is one of the neighbors of `node`.
-    template<class NodeType, class EdgeCostFunc>
-    size_t Execute(const std::vector<NodeType> &Nodes, size_t startIndex, size_t endIndex)
+    // The user may provide a custom EdgeCostFunc in the template parameters.
+    // The EdgeCostFunc functor must implement
+    // `size_t operator()(const std::vector<NodeType>& nodes, size_t sourceIndex, size_t destIndex)`
+    //
+    // Additionally, the user may provide a custom UpdatePredecessorFunc in the template parameters.
+    // The UpdatePredecessorFunc functor must implement
+    // `void operator()(std::vector<NodeType>& nodes, size_t sourceIndex, size_t destIndex)`
+    // The purpose of the UpdatePredecessorFunc is to optionally track node state. This can be
+    // useful for recording evaluated paths or for dynamic costing.
+    template<class NodeType, class EdgeCostFunc = DefaultEdgeCost<NodeType>, class UpdatePredecessorFunc = DefaultUpdatePredecessor<NodeType>>
+    static size_t Execute(std::vector<NodeType>& nodes, size_t startIndex, size_t endIndex)
     {
-        // Initialize data
-        std::fill(m_Visited.begin(), m_Visited.end(), false);
-        std::fill(m_Costs.begin(), m_Costs.end(), MaxCost);
-        m_Costs[startIndex] = 0;
- 
+        std::vector<bool> Visited(nodes.size(), false);
+        std::vector<size_t> Costs(nodes.size(), MaxCost);
+        Costs[startIndex] = 0;
+
         // Add the start node cost to the priority queue
         std::priority_queue<Edge, std::vector<Edge>, Edge::Greater> EdgeQueue;
         EdgeQueue.emplace(0, startIndex);
@@ -58,25 +76,26 @@ public:
             EdgeQueue.pop();
             size_t Index = edge.DestIndex;
 
-            if (m_Visited[Index])
+            if (Visited[Index])
                 continue;
-            
-            m_Visited[Index] = true;
+
+            Visited[Index] = true;
             if (Index == endIndex)
             {
-                return m_Costs[Index];
+                return edge.Cost;
             }
-            const NodeType& node = Nodes[Index];
+
+            const NodeType& node = nodes[Index];
 
             for (int i = 0; i < node.NumNeighbors(); ++i)
             {
                 size_t NeighborIndex = node.NeighborIndex(i);
-                EdgeCostFunc EdgeCost;
-                size_t NewCost = m_Costs[Index] + EdgeCost(node, Nodes[NeighborIndex]);
-                if (NewCost < m_Costs[NeighborIndex])
+                size_t NewCost = edge.Cost + EdgeCostFunc()(nodes, Index, NeighborIndex);
+                if (NewCost < Costs[NeighborIndex])
                 {
-                    m_Costs[NeighborIndex] = NewCost;
+                    Costs[NeighborIndex] = NewCost;
                     EdgeQueue.emplace(NewCost, NeighborIndex);
+                    UpdatePredecessorFunc()(nodes, Index, NeighborIndex);
                 }
             }
         }
