@@ -5,14 +5,13 @@
 
 class Dijkstras
 {
-    static const auto MaxCost = std::numeric_limits<size_t>::max();
-
+    template<class CostType>
     struct Edge
     {
-        size_t Cost;
+        CostType Cost;
         size_t DestIndex;
 
-        Edge(size_t cost, size_t destIndex) :
+        Edge(CostType cost, size_t destIndex) :
             Cost(cost),
             DestIndex(destIndex) {}
 
@@ -25,81 +24,92 @@ class Dijkstras
         };
     };
 
-public:
-    template<class NodeType>
-    struct DefaultEdgeCost
+    struct DefaultPathContext {};
+
+    template<class NodeType, class CostType, class PathContextType>
+    struct DefaultEdgeCostFunc
     {
-        size_t operator()(const std::vector<NodeType>&, size_t, size_t)
+        CostType operator()(size_t sourceIndex, size_t destIndex, const NodeType* nodes, PathContextType* pathContexts)
         {
-            // By default, assume the cost traversing to any neighbor
-            // has a cost of 1.
             return 1;
         }
     };
 
-    template<class NodeType>
-    struct DefaultUpdatePredecessor
+    template<class NodeType, class CostType, class PathContextType>
+    struct DefaultVisitFromFunc
     {
-        void operator()(std::vector<NodeType>&, size_t, size_t)
+        void operator()(size_t sourceIndex, size_t destIndex, const NodeType* nodes, CostType* costs, PathContextType* pathContexts)
         {
-            // Do nothing by default
+            // Do nothing
         }
     };
 
+public:
     // Templatized Execute function requires that `NodeType` implement the following:
     // size_t NumNeighbors()
-    // size_t NeighborIndex(size_t i) // Where `i` is in the range `[0, NumNeighbors())`
+    // size_t NeighborGraphIndex(size_t i) // Where `i` is in the range `[0, NumNeighbors())`
+    // size_t EdgeCost(size_t sourceIndex, size_t destIndex, const NodeType *nodes) const // Assumes dest is a neighbor to this node
+    // void VisitFrom(size_t sourceIndex, size_t destIndex, const NodeType *nodes, CostType *costs, PathContextType *pathContexts) const
     //
-    // The user may provide a custom EdgeCostFunc in the template parameters.
-    // The EdgeCostFunc functor must implement
-    // `size_t operator()(const std::vector<NodeType>& nodes, size_t sourceIndex, size_t destIndex)`
+    // The `CostType` template parameter is the costing value type.
     //
-    // Additionally, the user may provide a custom UpdatePredecessorFunc in the template parameters.
-    // The UpdatePredecessorFunc functor must implement
-    // `void operator()(std::vector<NodeType>& nodes, size_t sourceIndex, size_t destIndex)`
-    // The purpose of the UpdatePredecessorFunc is to optionally track node state. This can be
-    // useful for recording evaluated paths or for dynamic costing.
-    template<class NodeType, class EdgeCostFunc = DefaultEdgeCost<NodeType>, class UpdatePredecessorFunc = DefaultUpdatePredecessor<NodeType>>
-    static size_t Execute(std::vector<NodeType>& nodes, size_t startIndex, size_t endIndex)
+    // The `PathContext` template parameter is a type used to keep track of 
+    // user-specific transient data for a given Dijkstras::Execute instance.
+    // This can be used to keep track of path state such as direction of travel
+    // or keeping track of predecessor nodes.
+    template<
+        class NodeType,
+        class CostType = size_t,
+        class PathContextType = DefaultPathContext,
+        class EdgeCostFunc = DefaultEdgeCostFunc<NodeType, CostType, PathContextType>,
+        class VisitFromFunc = DefaultVisitFromFunc<NodeType, CostType, PathContextType>>
+    static CostType Execute(size_t numNodes, const NodeType* nodes, CostType* costs, PathContextType* pathContexts, size_t startIndex, size_t endIndex, CostType maxCost = 0)
     {
-        std::vector<bool> Visited(nodes.size(), false);
-        std::vector<size_t> Costs(nodes.size(), MaxCost);
-        Costs[startIndex] = 0;
+        CostType cost = 0;
+        costs[startIndex] = cost;
 
         // Add the start node cost to the priority queue
-        std::priority_queue<Edge, std::vector<Edge>, Edge::Greater> EdgeQueue;
+        std::priority_queue<Edge<CostType>, std::vector<Edge<CostType>>, typename Edge<CostType>::Greater> EdgeQueue;
         EdgeQueue.emplace(0, startIndex);
 
         while (!EdgeQueue.empty())
         {
-            Edge edge = EdgeQueue.top();
+            Edge<CostType> edge = EdgeQueue.top();
             EdgeQueue.pop();
-            size_t Index = edge.DestIndex;
+            size_t index = edge.DestIndex;
 
-            if (Visited[Index])
-                continue;
-
-            Visited[Index] = true;
-            if (Index == endIndex)
+            if (startIndex != endIndex && index == endIndex)
             {
-                return edge.Cost;
+                cost = costs[index];
+                break;
             }
 
-            const NodeType& node = nodes[Index];
+            if (edge.Cost > costs[index])
+                continue;
 
-            for (int i = 0; i < node.NumNeighbors(); ++i)
+            if (maxCost != 0 && edge.Cost > maxCost)
+                continue;
+
+            const NodeType& source = nodes[index];
+
+            for (int i = 0; i < source.NumNeighbors(); ++i)
             {
-                size_t NeighborIndex = node.NeighborIndex(i);
-                size_t NewCost = edge.Cost + EdgeCostFunc()(nodes, Index, NeighborIndex);
-                if (NewCost < Costs[NeighborIndex])
+                size_t destIndex = source.NeighborGraphIndex(i);
+
+                if (edge.Cost >= costs[destIndex])
+                    continue;
+
+                const NodeType& dest = nodes[destIndex];
+                CostType NewCost = edge.Cost + EdgeCostFunc()(index, destIndex, nodes, pathContexts);
+                if (NewCost < costs[destIndex])
                 {
-                    Costs[NeighborIndex] = NewCost;
-                    EdgeQueue.emplace(NewCost, NeighborIndex);
-                    UpdatePredecessorFunc()(nodes, Index, NeighborIndex);
+                    costs[destIndex] = NewCost;
+                    EdgeQueue.emplace(NewCost, destIndex);
+                    VisitFromFunc()(index, destIndex, nodes, costs, pathContexts);
                 }
             }
         }
 
-        return MaxCost;
+        return cost;
     }
 };

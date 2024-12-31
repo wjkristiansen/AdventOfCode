@@ -9,127 +9,112 @@ public:
     {
     }
 
+    struct PathContext
+    {
+        char Symbol;
+        size_t Predecessor;
+    };
+
     struct MazeNode
     {
         const AsciiGrid& MazeGrid;
         size_t Row;
         size_t Col;
-        size_t PredecessorIndex;
-        char Symbol;
         std::vector<size_t> NeighborIndices;
 
         MazeNode() = default;
-        MazeNode(const AsciiGrid& mazeGrid, size_t row, size_t col) :
+        MazeNode(const AsciiGrid& mazeGrid, size_t row, size_t col, char symbol) :
             MazeGrid(mazeGrid),
             Row(row),
-            Col(col),
-            PredecessorIndex(NodeIndex()),
-            Symbol(mazeGrid.GetValue(row, col))
+            Col(col)
         {
-            std::set<size_t> tempNeighborIndices
-            {
-                {NodeIndex() + 1}, // East
-                {NodeIndex() + MazeGrid.Width()}, // South
-                {NodeIndex() - 1}, // West
-                {NodeIndex() - MazeGrid.Width()}, // North
-            };
+            if (symbol == '#' || symbol == 'E')
+                return; // Don't add any neighbor nodes
+            
+            size_t index = GetIndex();
 
-            if (Row == 0)
+            if (Row > 0 && MazeGrid.GetValue(row - 1, col) != '#')
             {
-                tempNeighborIndices.erase(NodeIndex() - MazeGrid.Width()); // No North
-            }
-            if (Row == MazeGrid.Height() - 1)
-            {
-                tempNeighborIndices.erase(NodeIndex() + MazeGrid.Width()); // No South
-            }
-            if (Col == 0)
-            {
-                tempNeighborIndices.erase(NodeIndex() - 1); // No West
-            }
-            if (Col == MazeGrid.Width() - 1)
-            {
-                tempNeighborIndices.erase(NodeIndex() + 1); // No East
+                // North
+                NeighborIndices.emplace_back(index - MazeGrid.Width());
             }
 
-            // See if any of the remaining nodes are blocked
-            for (auto it = tempNeighborIndices.begin(); it != tempNeighborIndices.end();)
+            if (Row < MazeGrid.Height() && MazeGrid.GetValue(row + 1, col) != '#')
             {
-                size_t index = *it;
-                size_t row = index / MazeGrid.Width();
-                size_t col = index % MazeGrid.Width();
-
-                if (MazeGrid.GetValue(row, col) == '#')
-                    it = tempNeighborIndices.erase(it);
-                else
-                    ++it;
+                // South
+                NeighborIndices.emplace_back(index + MazeGrid.Width());
             }
 
-            NeighborIndices = std::vector<size_t>(tempNeighborIndices.begin(), tempNeighborIndices.end());
+            if (Col > 0 && MazeGrid.GetValue(row, col - 1) != '#')
+            {
+                NeighborIndices.emplace_back(index - 1);
+            }
+
+            if (Col < MazeGrid.Width() && MazeGrid.GetValue(row, col + 1) != '#')
+            {
+                NeighborIndices.emplace_back(index + 1);
+            }
         }
 
-        size_t NodeIndex() const
-        {
-            return Row * MazeGrid.Height() + Col;
-        };
+        size_t GetIndex() const { return Row* MazeGrid.Width() + Col; }
 
         size_t NumNeighbors() const
         {
             return NeighborIndices.size();
         }
 
-        size_t NeighborIndex(size_t i) const
+        size_t NeighborGraphIndex(size_t i) const
         {
             return NeighborIndices[i];
         }
-    };
 
-    struct EdgeCost
-    {
-        size_t operator()(const std::vector<MazeNode> &nodes, size_t sourceIndex, size_t destIndex)
+        char MoveToNeighborSymbol(const MazeNode &dest) const
         {
-            const MazeNode& source = nodes[sourceIndex];
-            const MazeNode& dest = nodes[destIndex];
-            char sourceDirSymbol = source.Symbol;
-            char newDirSymbol = '.';
-            if (source.Col == dest.Col)
+            char moveSymbol = '.';
+            if (Row == dest.Row)
             {
-                newDirSymbol = source.Row < dest.Row ? 'v' : '^';
+                if (Col < dest.Col)
+                    moveSymbol = '>';
+                else
+                    moveSymbol = '<';
             }
             else
             {
-                assert(source.Row == dest.Row);
-                newDirSymbol = source.Col < dest.Col ? '>' : '<';
+                if (Row < dest.Row)
+                    moveSymbol = 'v';
+                else
+                    moveSymbol = '^';
             }
 
-            if (newDirSymbol != sourceDirSymbol)
-            {
-                return 1001;
-            }
-
-            return 1;
+            return moveSymbol;
         }
     };
 
-    struct UpdatePredecessor
+    struct EdgeCostFunc
     {
-        void operator()(std::vector<MazeNode>& nodes, size_t sourceIndex, size_t destIndex)
+        size_t operator()(size_t sourceIndex, size_t destIndex, const MazeNode *nodes, PathContext *pathContexts) const
         {
-            const MazeNode& source = nodes[sourceIndex];
-            MazeNode& dest = nodes[destIndex];
+            size_t cost = 1;
 
-            dest.PredecessorIndex = sourceIndex;
-            char sourceDirSymbol = source.Symbol;
-            char newDirSymbol = '.';
-            if (source.Col == dest.Col)
-            {
-                newDirSymbol = source.Row < dest.Row ? 'v' : '^';
-            }
-            else
-            {
-                assert(source.Row == dest.Row);
-                newDirSymbol = source.Col < dest.Col ? '>' : '<';
-            }
-            dest.Symbol = newDirSymbol;
+            const MazeNode& dest = nodes[destIndex];
+            const MazeNode& source = nodes[sourceIndex];
+            char optimalSymbol = source.MoveToNeighborSymbol(dest);
+
+            if (optimalSymbol != pathContexts[sourceIndex].Symbol)
+                cost += 1000;
+
+            return cost;
+        }
+    };
+
+    struct VisitFromFunc
+    {
+        void operator()(size_t sourceIndex, size_t destIndex, const MazeNode* nodes, size_t* costs, PathContext* pathContexts) const
+        {
+            const MazeNode& dest = nodes[destIndex];
+            const MazeNode& source = nodes[sourceIndex];
+            pathContexts[destIndex].Symbol = source.MoveToNeighborSymbol(dest);
+            pathContexts[destIndex].Predecessor = sourceIndex;
         }
     };
 
@@ -145,40 +130,52 @@ public:
 
         size_t numNodes = m_MazeGrid.Width() * m_MazeGrid.Height();
         std::vector<MazeNode> mazeNodes;
+        size_t endIndex;
+        size_t startIndex;
+
+        std::vector<size_t> costs(numNodes, std::numeric_limits<size_t>::max());
+        std::vector<PathContext> pathContexts(numNodes);
 
         for (size_t row = 0; row < m_MazeGrid.Height(); ++row)
         {
             for (size_t col = 0; col < m_MazeGrid.Width(); ++col)
             {
-                mazeNodes.emplace_back(m_MazeGrid, row, col);
+                size_t index = row * m_MazeGrid.Width() + col;
+                auto symbol = m_MazeGrid.GetValue(row, col);
+
+                if (symbol == 'E')
+                {
+                    endIndex = index;
+                }
+                else if (symbol == 'S')
+                {
+                    startIndex = index;
+                    symbol = '>';
+                }
+
+                mazeNodes.emplace_back(m_MazeGrid, row, col, symbol == 'S' ? '>' : symbol);
+
+                pathContexts[index].Symbol = symbol;
             }
         }
 
-        size_t startIndex = 0;
-        size_t endIndex = 0;
-        for (size_t index = 0; index < mazeNodes.size(); ++index)
-        {
-            auto& node = mazeNodes[index];
-
-            switch (node.Symbol)
-            {
-            case 'S':
-                node.Symbol = '>';
-                startIndex = index;
-                break;
-            case 'E':
-                endIndex = index;
-                break;
-            }
-        }
-
-        size_t minCost = Dijkstras::Execute<MazeNode, EdgeCost, UpdatePredecessor>(mazeNodes, startIndex, endIndex);
+        size_t minCost = Dijkstras::Execute<MazeNode, size_t, PathContext, EdgeCostFunc, VisitFromFunc>(mazeNodes.size(), mazeNodes.data(), costs.data(), pathContexts.data(), startIndex, endIndex);
 
         assert(minCost != std::numeric_limits<size_t>::max());
 
+        // Print all paths
+        for (size_t index = 0; index < mazeNodes.size(); ++index)
+        {
+            if (index % m_MazeGrid.Width() == 0)
+                std::cout << std::endl;
+            
+            std::cout << pathContexts[index].Symbol;
+        }
+        std::cout << std::endl;
+
         // Walk from the end to the start to build the path coordinates
         std::deque<size_t> path;
-        for (size_t index = endIndex; index != startIndex; index = mazeNodes[index].PredecessorIndex)
+        for (size_t index = endIndex; index != startIndex; index = pathContexts[index].Predecessor)
         {
             path.push_front(index);
         }
@@ -187,7 +184,7 @@ public:
         auto pathGrid = m_MazeGrid;
         for (auto index : path)
         {
-            pathGrid.SetValue(mazeNodes[index].Row, mazeNodes[index].Col, mazeNodes[index].Symbol);
+            pathGrid.SetValue(mazeNodes[index].Row, mazeNodes[index].Col, pathContexts[index].Symbol);
         }
 
         pathGrid.Print();

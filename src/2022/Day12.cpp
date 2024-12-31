@@ -5,6 +5,8 @@
 
 class CSolution12: public CSolutionBase
 {
+    struct PathContext {};
+
     struct HeightMapNode
     {
         char Height;
@@ -13,7 +15,7 @@ class CSolution12: public CSolutionBase
         HeightMapNode(char height) : Height(height) {}
 
         size_t NumNeighbors() const { return NeighborIndices.size(); }
-        size_t NeighborIndex(size_t i) const { return NeighborIndices[i]; }
+        size_t NeighborGraphIndex(size_t i) const { return NeighborIndices[i]; }
     };
 
     void Execute(int)
@@ -94,15 +96,20 @@ class CSolution12: public CSolutionBase
                 Node.NeighborIndices.push_back(NeighborIndex);
         }
 
-        size_t steps = Dijkstras::Execute<HeightMapNode>(HeightMapNodes, StartIndex, EndIndex);
+        std::vector<size_t> costs(HeightMapNodes.size(), std::numeric_limits<size_t>::max());
+
+        size_t steps = Dijkstras::Execute<HeightMapNode, size_t, PathContext>(HeightMapNodes.size(), HeightMapNodes.data(), costs.data(), nullptr, StartIndex, EndIndex);
+        assert(steps == costs[EndIndex]);
 
         std::cout << "Steps: " << steps << std::endl;
 
         size_t MinSteps = std::numeric_limits<size_t>::max();
         for(auto Start : PotentialStartPoints)
         {
-            steps = Dijkstras::Execute<HeightMapNode>(HeightMapNodes, Start, EndIndex);
-            if(steps < MinSteps)
+            std::fill(costs.begin(), costs.end(), std::numeric_limits<size_t>::max());
+            steps = Dijkstras::Execute<HeightMapNode, size_t, PathContext>(HeightMapNodes.size(), HeightMapNodes.data(), costs.data(), nullptr, Start, EndIndex);
+            assert(steps == costs[EndIndex]);
+            if (steps < MinSteps)
                 MinSteps = steps;
         }
 
