@@ -159,37 +159,91 @@ public:
             }
         }
 
-        size_t minCost = Dijkstras::Execute<MazeNode, size_t, PathContext, EdgeCostFunc, VisitFromFunc>(mazeNodes.size(), mazeNodes.data(), costs.data(), pathContexts.data(), startIndex, endIndex);
-
-        assert(minCost != std::numeric_limits<size_t>::max());
-
-        // Print all paths
-        for (size_t index = 0; index < mazeNodes.size(); ++index)
+        if (part == 1)
         {
-            if (index % m_MazeGrid.Width() == 0)
-                std::cout << std::endl;
-            
-            std::cout << pathContexts[index].Symbol;
-        }
-        std::cout << std::endl;
+            size_t minCost = Dijkstras::Execute<MazeNode, size_t, PathContext, EdgeCostFunc, VisitFromFunc>(mazeNodes.size(), mazeNodes.data(), costs.data(), pathContexts.data(), startIndex, endIndex);
 
-        // Walk from the end to the start to build the path coordinates
-        std::deque<size_t> path;
-        for (size_t index = endIndex; index != startIndex; index = pathContexts[index].Predecessor)
+            assert(minCost != std::numeric_limits<size_t>::max());
+
+            // Print all paths
+            for (size_t index = 0; index < mazeNodes.size(); ++index)
+            {
+                if (index % m_MazeGrid.Width() == 0)
+                    std::cout << std::endl;
+                
+                std::cout << pathContexts[index].Symbol;
+            }
+            std::cout << std::endl;
+
+            // Walk from the end to the start to build the path coordinates
+            std::deque<size_t> path;
+            for (size_t index = endIndex; index != startIndex; index = pathContexts[index].Predecessor)
+            {
+                path.push_front(index);
+            }
+
+            // Print the final path
+            auto pathGrid = m_MazeGrid;
+            for (auto index : path)
+            {
+                pathGrid.SetValue(mazeNodes[index].Row, mazeNodes[index].Col, pathContexts[index].Symbol);
+            }
+
+            pathGrid.Print();
+
+            std::cout << "Part 1: Score: " << minCost << std::endl;
+        }
+        else
         {
-            path.push_front(index);
+            size_t minCost = Dijkstras::Execute<MazeNode, size_t, PathContext, EdgeCostFunc, VisitFromFunc>(mazeNodes.size(), mazeNodes.data(), costs.data(), pathContexts.data(), startIndex, endIndex);
+
+            // For each location not already on the original path,
+            // calculate the additional cost to the end. If it matches
+            // the minimum cost, then add the new path to as an alternative
+            // route.
+            std::set<size_t> uniqueVisits;
+            for (size_t index = endIndex; index != startIndex; index = pathContexts[index].Predecessor)
+            {
+                uniqueVisits.insert(index);
+            }
+            uniqueVisits.insert(startIndex);
+
+            for (size_t altIndex = 0; altIndex < mazeNodes.size(); ++altIndex)
+            {
+                if (costs[altIndex] > minCost)
+                    continue; // Already too expensive
+                std::vector<size_t> altCosts(mazeNodes.size(), std::numeric_limits<size_t>::max());
+                std::vector<PathContext> altPathContexts(mazeNodes.size());
+                altPathContexts[altIndex] = pathContexts[altIndex]; // Restore the original path context for the start node
+                size_t maxCost = minCost - costs[altIndex];
+                size_t additionalCost = Dijkstras::Execute<MazeNode, size_t, PathContext, EdgeCostFunc, VisitFromFunc>(mazeNodes.size(), mazeNodes.data(), altCosts.data(), altPathContexts.data(), altIndex, endIndex, maxCost);
+                if (additionalCost > 0)
+                {
+                    size_t altCost = costs[altIndex] + additionalCost;
+
+                    if (altCost == minCost && uniqueVisits.find(altCost) == uniqueVisits.end())
+                    {
+                        for (size_t index = endIndex; index != altIndex; index = altPathContexts[index].Predecessor)
+                        {
+                            uniqueVisits.insert(index);
+                        }
+                        uniqueVisits.insert(altIndex);
+                    }
+                }
+            }
+
+            AsciiGrid tempGrid = m_MazeGrid;
+
+            for (auto index : uniqueVisits)
+            {
+                tempGrid.SetValue(mazeNodes[index].Row, mazeNodes[index].Col, 'O');
+            }
+
+            tempGrid.Print();
+
+            assert(minCost != std::numeric_limits<size_t>::max());
+            std::cout << "Part 2: Score: " << uniqueVisits.size() << std::endl;
         }
-
-        // Print the final path
-        auto pathGrid = m_MazeGrid;
-        for (auto index : path)
-        {
-            pathGrid.SetValue(mazeNodes[index].Row, mazeNodes[index].Col, pathContexts[index].Symbol);
-        }
-
-        pathGrid.Print();
-
-        std::cout << "Part 1: Score: " << minCost << std::endl;
     }
 };
 
